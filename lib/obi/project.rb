@@ -40,8 +40,10 @@ module Obi
         end
 
         def create_directories(directory_name)
-            FileUtils.mkdir File.join( @@config_settings['local_project_directory'], directory_name )
-
+            pre_path_str = File.join( @@config_settings['local_project_directory'], directory_name)
+            path_str = "parent_folder/sub_dir/{ai,architecture,content,emails,estimates,fonts,gif,jpg,pdf,png,psd}"
+            le_paths = path_str.match(/\{(.*)\}/)[1].split(',').map {|s| "#{pre_path_str}/_resources/assets/" << s }
+            FileUtils::mkdir_p le_paths , {:noop => false, :verbose => false}
         end
 
         def wordpress(directory_name)
