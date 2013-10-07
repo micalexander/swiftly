@@ -32,7 +32,7 @@ module Obi
 			until @@actions.include?(action)
 				puts "\nActions: " + @@actions.join(", ") if action
 				print "> "
-				user_response = gets.chomp
+				user_response = $stdin.gets.chomp
 				args = user_response.downcase.strip.split(' ')
 				action = args.shift
 			end
@@ -63,6 +63,7 @@ module Obi
 				self.launch_menu!("#{confirmation} #{@@config_settings[setting_variable]}")
 			end
 
+			# based on users chosen action carry out the action
 			case action
 			when '1'
 				carry_out_action "Please enter your desired project working directory without the trailing slash or \n\t\t\t\t     simply drag and drop the desired folder into this window and press ENTER", 'local_project_directory', "Your project working directory is currently set to:"
@@ -101,46 +102,45 @@ module Obi
 			end
 		end
 
+		# display menu
 		def menu_output
 			system ("clear")
-
-			# puts system("date")
 			print <<-eos
-				Obi
+			Obi
 
-				\033[36mYet another Jedi mindtrick\033[0m
+			\033[36mYet another Jedi mindtrick\033[0m
 
-				\033[4;37mLocal Enviornment \033[0m
+			\033[4;37mLocal Enviornment \033[0m
 
-				1. Toggle local server settings. \033[33m#{@@config_settings['local_project_directory']}\033[0m
+			1. Toggle local server settings. \033[33m#{@@config_settings['local_project_directory']}\033[0m
 
-				2. Toggle local server settings. \033[33m#{@@config_settings['local_settings']}\033[0m
-				3. Change local database host currently set to \033[33m#{@@config_settings['local_host']}\033[0m
-				4. Change local database user currently set to \033[33m#{@@config_settings['local_user']}\033[0m
-				5. Change local database password currently set to \033[33m#{@@config_settings['local_password']}\033[0m
+			2. Toggle local server settings. \033[33m#{@@config_settings['local_settings']}\033[0m
+			3. Change local database host currently set to \033[33m#{@@config_settings['local_host']}\033[0m
+			4. Change local database user currently set to \033[33m#{@@config_settings['local_user']}\033[0m
+			5. Change local database password currently set to \033[33m#{@@config_settings['local_password']}\033[0m
 
-				\033[4;37mStaging Enviornment \033[0m
+			\033[4;37mStaging Enviornment \033[0m
 
-				6. Toggle staging server settings. \033[33m#{@@config_settings['staging_settings']}\033[0m
-				7. Change staging database domain currently set to \033[33m#{@@config_settings['staging_domain']}\033[0m
-				8. Change staging host currently set to \033[33m#{@@config_settings['staging_host']}\033[0m
-				9. Change staging database user currently set to \033[33m#{@@config_settings['staging_user']}\033[0m
-				10. Change staging database password currently set to \033[33m#{@@config_settings['staging_password']}\033[0m
+			6. Toggle staging server settings. \033[33m#{@@config_settings['staging_settings']}\033[0m
+			7. Change staging database domain currently set to \033[33m#{@@config_settings['staging_domain']}\033[0m
+			8. Change staging host currently set to \033[33m#{@@config_settings['staging_host']}\033[0m
+			9. Change staging database user currently set to \033[33m#{@@config_settings['staging_user']}\033[0m
+			10. Change staging database password currently set to \033[33m#{@@config_settings['staging_password']}\033[0m
 
-				\033[4;37mProduction Enviornment \033[0m
+			\033[4;37mProduction Enviornment \033[0m
 
-				11. Toggle production server settings. \033[33m#{@@config_settings['production_settings']}\033[0m
-				12. Change production database domain currently set to \033[33m#{@@config_settings['production_domain']}\033[0m
-				13. Change production database host currently set to \033[33m#{@@config_settings['production_host']}\033[0m
-				14. Change production database user currently set to \033[33m#{@@config_settings['production_user']}\033[0m
-				15. Change production database password currently set to \033[33m#{@@config_settings['production_password']}\033[0m
+			11. Toggle production server settings. \033[33m#{@@config_settings['production_settings']}\033[0m
+			12. Change production database domain currently set to \033[33m#{@@config_settings['production_domain']}\033[0m
+			13. Change production database host currently set to \033[33m#{@@config_settings['production_host']}\033[0m
+			14. Change production database user currently set to \033[33m#{@@config_settings['production_user']}\033[0m
+			15. Change production database password currently set to \033[33m#{@@config_settings['production_password']}\033[0m
 
-				x. Exit and return back to the terminal
+			quit. Exit and return back to the terminal
 
 
-				obi: \033[36m#{@@msg}\033[0m
+			obi: \033[36m#{@@msg}\033[0m
 
-				Select by pressing the number and then ENTER
+			Select by pressing the number and then ENTER
 			eos
 		end
 

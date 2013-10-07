@@ -1,6 +1,7 @@
 require 'Thor'
 require 'obi/Version'
 require 'obi/Menu'
+require 'obi/Project'
 
 module Obi
 	class Controller < Thor
@@ -20,6 +21,19 @@ module Obi
 			end
 		end
 
+		desc "generate", "Generate projects by passing a project name"
+
+		method_option :empty, :aliases => "-e", :type => :boolean
+		method_option :git, :aliases => "-g", :type => :boolean
+		method_option :wordpress, :aliases => "-w", :type => :boolean
+
+		def generate(project_name)
+			project = Obi::Project.new
+			case options.keys[0]
+			 when "wordpress"
+				project.wordpress(project_name)
+			 end
+		end
 
 	end
 end

@@ -8,7 +8,6 @@ CONFIG_FILE_LOCATION = File.absolute_path(".obiconfig")
 require 'obi/Controller'
 
 delegate = Obi::Controller.new
-delegate.config
 
 Obi::Controller.start
 
