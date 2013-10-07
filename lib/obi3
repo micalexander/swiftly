@@ -1,16 +1,13 @@
 #!/usr/bin/env ruby
 
 APP_ROOT = File.dirname(__FILE__)
-
 $:.unshift( APP_ROOT )
 
-require 'obi/Controller'
-require 'yaml'
+CONFIG_FILE_LOCATION = File.absolute_path(".obiconfig")
 
-CONFIG = YAML.load_file("../.obiconfig") unless defined? CONFIG
+require 'obi/Controller'
 
 delegate = Obi::Controller.new
-
 delegate.config
 
 Obi::Controller.start

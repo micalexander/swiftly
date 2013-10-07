@@ -10,9 +10,8 @@ module Obi
 		# Handles the creation of the .obiconfig file
 		desc "config", "Maintain configuration variables"
 		def config
-			config_file = '../../.obiconfig'
-			if (!File.exist?( config_file ))
-				File.open( config_file, 'w') do |file|
+			if (!File.exist?( CONFIG_FILE_LOCATION ))
+				File.open( CONFIG_FILE_LOCATION, 'w') do |file|
 					file.puts VERSION
 				end
 			else
