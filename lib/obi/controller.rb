@@ -28,10 +28,10 @@ module Obi
 		method_option :wordpress, :aliases => "-w", :type => :boolean
 
 		def generate(project_name)
-			project = Obi::Project.new
+			project = Obi::Project.new(project_name)
 			case options.keys[0]
 			 when "wordpress"
-				project.wordpress(project_name)
+				project.wordpress
 			 end
 		end
 

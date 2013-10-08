@@ -1,10 +1,14 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    git (1.2.6)
+    rubyzip (1.0.0)
     thor (0.18.1)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  git
+  rubyzip
   thor
