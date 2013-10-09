@@ -7,7 +7,7 @@ local_user: root
 local_password: root
 
 staging_settings: disabled
-staging_domain: 0
+staging_domain: psstudiosdev.com
 staging_host: 0
 staging_user: 0
 staging_password: 0

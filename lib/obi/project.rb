@@ -1,5 +1,4 @@
 require 'net/http'
-
 require 'fileutils'
 require 'git'
 require 'zip'
@@ -126,33 +125,72 @@ module Obi
                 FileUtils.rm(File.join(@@project_path, "wp-content", "themes", "master.zip"))
                 FileUtils.mv(File.join(@@project_path, "wp-content", "themes", "mask-master"), File.join(@@project_path, "wp-content", "themes", "#{@@project_name}"))
 
-                # Move the wp-config, .htaccess, Guardfile, Gemfile, and Gemfile.lock files to the site root
+                # move the wp-config, .htaccess, Guardfile, Gemfile, and Gemfile.lock files to the site root
                 FileUtils.mv(File.join(@@project_path, "wp-content", "themes", "#{@@project_name}", ".htaccess"), @@project_path )
                 FileUtils.mv(File.join(@@project_path, "wp-content", "themes", "#{@@project_name}", "wp-config.php"), @@project_path )
                 FileUtils.mv(File.join(@@project_path, "wp-content", "themes", "#{@@project_name}", "Guardfile"), @@project_path )
                 FileUtils.mv(File.join(@@project_path, "wp-content", "themes", "#{@@project_name}", "Gemfile"), @@project_path )
                 FileUtils.mv(File.join(@@project_path, "wp-content", "themes", "#{@@project_name}", "Gemfile.lock"), @@project_path )
 
-                # Move site specific plugin to the plugins folder
+                # remove sample wp-config
+                FileUtils.rm(File.join(@@project_path, "wp-config-sample.php"))
+
+                # move site specific plugin to the plugins folder
                 FileUtils.mv(File.join(@@project_path, "wp-content", "themes", "#{@@project_name}", "mask-specific-plugin"), File.join(@@project_path, "wp-content", "plugins", "#{@@project_name}-specific-plugin"))
                 FileUtils.mv(File.join(@@project_path, "wp-content", "plugins", "#{@@project_name}-specific-plugin",  "mask-plugin.php"), File.join(@@project_path, "wp-content", "plugins", "#{@@project_name}-specific-plugin", "#{@@project_name}-plugin.php"))
 
-                # # Find and replace the mask name with the project name
+                # find and replace the mask name with the project name
                 FileUtils.mv(File.join(@@project_path, "wp-content", "themes", "#{@@project_name}", "img", "wp-login-logo-mask.png"), File.join(@@project_path, "wp-content", "themes", "#{@@project_name}", "img", "wp-login-logo-#{@@project_name}.png"))
 
-                # # Find and replace the mask name with the project name
+                # find and replace the mask name with the project name
+                # - files to perform find and repalce on
                 plugin_file = File.read(File.join(@@project_path, "wp-content", "plugins", "#{@@project_name}-specific-plugin", "#{@@project_name}-plugin.php"))
                 function_file = File.read(File.join(@@project_path, "wp-content", "themes", "#{@@project_name}", "functions.php"))
                 guard_file = File.read(File.join(@@project_path, "Guardfile"))
                 ie_file = File.read(File.join(@@project_path, "wp-content", "themes", "#{@@project_name}", "sass", "ie.scss"))
+                # - text to find and replace
                 plugin_replace = plugin_file.gsub(/mask/, "#{@@project_name}".capitalize)
                 function_replace = function_file.gsub(/mask/, "#{@@project_name}")
                 guard_replace = guard_file.gsub(/mask/, "#{@@project_name}")
                 ie_replace = ie_file.gsub(/mask/, "#{@@project_name}")
+                # - open file and perform find and replace
                 File.open(File.join(@@project_path, "wp-content", "plugins", "#{@@project_name}-specific-plugin", "#{@@project_name}-plugin.php"), "w") {|file| file.puts plugin_replace}
                 File.open(File.join(@@project_path, "wp-content", "themes", "#{@@project_name}", "functions.php"), "w") {|file| file.puts function_replace}
                 File.open(File.join(@@project_path, "Guardfile"), "w") {|file| file.puts guard_replace}
                 File.open(File.join(@@project_path, "wp-content", "themes", "#{@@project_name}", "sass", "ie.scss"), "w") {|file| file.puts ie_replace}
+
+                # find and replace variables on wp-config file
+                # - the wp-config file
+                # - escape the staging domain period
+                # - table prefix to replace
+                # - text to find and replace
+                # - open file and perform find and replace
+                wp_config_staging_file = File.read(File.join(@@project_path, "wp-config.php"))
+                staging_domain_pattern = /\./
+                escaped_staging_domain = @@config_settings['staging_domain'].gsub(staging_domain_pattern){ |match| "\\" + match  }
+                wp_config_replace_staging = wp_config_staging_file.gsub(/staging_tld/, escaped_staging_domain)
+                File.open(File.join(@@project_path, "wp-config.php"), "w") {|file| file.puts wp_config_replace_staging}
+
+                wp_config_table_file = File.read(File.join(@@project_path, "wp-config.php"))
+                table_prefix = @@project_name[0,3]
+                wp_config_replace_table = wp_config_table_file.gsub(/table_prefix  = 'wp_'/, "table_prefix  = '#{table_prefix}_'")
+                File.open(File.join(@@project_path, "wp-config.php"), "w") {|file| file.puts wp_config_replace_table}
+
+                wp_config_dev_file = File.read(File.join(@@project_path, "wp-config.php"))
+                wp_config_replace_dev = wp_config_dev_file.gsub(/\"\.dev\"/, "\"#{@@project_name}.dev\"")
+                File.open(File.join(@@project_path, "wp-config.php"), "w") {|file| file.puts wp_config_replace_dev}
+
+                wp_config_mask_file = File.read(File.join(@@project_path, "wp-config.php"))
+                wp_config_replace_mask = wp_config_mask_file.gsub(/mask/, "#{@@project_name}")
+                File.open(File.join(@@project_path, "wp-config.php"), "w") {|file| file.puts wp_config_replace_mask}
+
+                # add salts
+                source = Net::HTTP.get('api.wordpress.org', '/secret-key/1.1/salt')
+                wp_config_salts_file = File.read(File.join(@@project_path, "wp-config.php"))
+                wp_config_replace_salt = wp_config_mask_file.gsub(/\/\/\sInsert_Salts_Below/, source)
+                File.open(File.join(@@project_path, "wp-config.php"), "w") {|file| file.puts wp_config_replace_salt}
+
+
 
                 # enable git repository
                 enable_git
