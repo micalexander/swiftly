@@ -79,8 +79,6 @@ module Obi
         end
 
         def empty
-            # environment = Obi::Environment.new
-            # puts environment.environment_settings("production")
 
         end
 
@@ -151,45 +149,21 @@ module Obi
                 FileUtils.mv(File.join(@@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-mask.png"), File.join(@@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-#{@project_name}.png"))
 
                 # find and replace the mask name with the project name
-                # - files to perform find and repalce on
-                plugin_file = File.read(File.join(@@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"))
-                function_file = File.read(File.join(@@project_path, "wp-content", "themes", "#{@project_name}", "functions.php"))
-                guard_file = File.read(File.join(@@project_path, "Guardfile"))
-                ie_file = File.read(File.join(@@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss"))
                 # - text to find and replace
-                plugin_replace = plugin_file.gsub(/mask/, "#{@project_name}".capitalize)
-                function_replace = function_file.gsub(/mask/, "#{@project_name}")
-                guard_replace = guard_file.gsub(/mask/, "#{@project_name}")
-                ie_replace = ie_file.gsub(/mask/, "#{@project_name}")
+                plugin_replace = File.read(File.join(@@project_path, "wp-content", "plugins",
+                    "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/mask/, "#{@project_name}".capitalize)
+                function_replace = File.read(File.join(@@project_path, "wp-content", "themes", "#{@project_name}", "functions.php")).gsub(/mask/, "#{@project_name}")
+                guard_replace = File.read(File.join(@@project_path, "Guardfile")).gsub(/mask/, "#{@project_name}")
+                ie_replace = File.read(File.join(@@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss")).gsub(/mask/, "#{@project_name}")
                 # - open file and perform find and replace
-                File.open(File.join(@@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") {|file| file.puts plugin_replace}
-                File.open(File.join(@@project_path, "wp-content", "themes", "#{@project_name}", "functions.php"), "w") {|file| file.puts function_replace}
-                File.open(File.join(@@project_path, "Guardfile"), "w") {|file| file.puts guard_replace}
-                File.open(File.join(@@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss"), "w") {|file| file.puts ie_replace}
+                File.open(File.join(@@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
+                    file.puts plugin_replace }
+                File.open(File.join(@@project_path, "wp-content", "themes", "#{@project_name}", "functions.php"), "w") { |file| file.puts function_replace }
+                File.open(File.join(@@project_path, "Guardfile"), "w") { |file| file.puts guard_replace }
+                File.open(File.join(@@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss"), "w") { |file| file.puts ie_replace }
 
                 # find and replace variables on wp-config file
-                # - the wp-config file
-                # - escape the staging domain period
-                # - table prefix to replace
-                # - text to find and replace
-                # - open file and perform find and replace
-                escaped_staging_domain = @config_settings['staging_domain'].gsub(/\./){ |match| "\\" + match  }
-                wp_config_replace_staging = File.read(File.join(@@project_path, "wp-config.php")).gsub(/staging_tld/, escaped_staging_domain)
-                File.open(File.join(@@project_path, "wp-config.php"), "w") {|file| file.puts wp_config_replace_staging}
-
-                table_prefix = @project_name[0,3]
-                wp_config_replace_table = File.read(File.join(@@project_path, "wp-config.php")).gsub(/table_prefix  = 'wp_'/, "table_prefix  = '#{table_prefix}_'")
-                File.open(File.join(@@project_path, "wp-config.php"), "w") {|file| file.puts wp_config_replace_table}
-
-                wp_config_replace_mask = File.read(File.join(@@project_path, "wp-config.php")).gsub(/mask/, "#{@project_name}")
-                File.open(File.join(@@project_path, "wp-config.php"), "w") {|file| file.puts wp_config_replace_mask}
-
-                # add salts
-                source = Net::HTTP.get('api.wordpress.org', '/secret-key/1.1/salt')
-                wp_config_replace_salt = File.read(File.join(@@project_path, "wp-config.php")).gsub(/\/\/\sInsert_Salts_Below/, source)
-                File.open(File.join(@@project_path, "wp-config.php"), "w") {|file| file.puts wp_config_replace_salt}
-
-                # define WP_ENV variables
+                # - define WP_ENV variables
                 find_config_value =  File.read( File.join( @@project_path,
                         "wp-config.php"))[/\(\s*WP_ENV\s*==\s*'\s*local\s*'\s*\).*{[\s|\S]*?}/]
                 replace_config_value =  File.read( File.join( @@project_path,
@@ -202,9 +176,15 @@ module Obi
                                  .gsub!(/(('|")\s*WP_SITEURL\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@project_name}.dev#{$3}" }
                                  .gsub!(/(('|")\s*WP_HOME\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@project_name}.dev#{$3}" }
                 end
+                # - put the wp-config file in memory
                 wp_config = File.read(File.join(@@project_path, "wp-config.php"))
+                # - find and replace remaining values on the the wp-config
+                wp_config.gsub!(/staging_tld/, @config_settings['staging_domain'].gsub(/\./){ |match| "\\" + match  })
+                wp_config.gsub!(/mask/, "#{@project_name}")
                 wp_config.gsub!(Regexp.new(Regexp.escape(replace_config_value)), "#{find_config_value}")
-
+                wp_config.gsub!(/\/\/\s*Insert_Salts_Below/, Net::HTTP.get('api.wordpress.org', '/secret-key/1.1/salt'))
+                wp_config.gsub!(/(table_prefix\s*=\s*')(wp_)'/) {"#{$1}#{@project_name[0,3]}_"}
+                # - write to wp-config
                 File.open(File.join(@@project_path, "wp-config.php"), "w") {|file| file.puts wp_config}
 
                 # Create project's database
