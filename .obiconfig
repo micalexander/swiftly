@@ -6,13 +6,13 @@ local_host: localhost
 local_user: root
 local_password: root
 
-staging_settings: disabled
+staging_settings: wp-enabled
 staging_domain: psstudiosdev.com
 staging_host: 0
 staging_user: 0
 staging_password: 0
 
-production_settings: enabled
+production_settings: wp-enabled
 production_domain: 0
 production_host: 0
 production_user: 0

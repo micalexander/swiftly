@@ -6,22 +6,22 @@ module Obi
 
 		include Thor::Actions
 
-		@@config_settings = YAML.load_file(CONFIG_FILE_LOCATION) unless defined? @@config_settings
+		@config_settings = YAML.load_file(CONFIG_FILE_LOCATION) unless defined? @config_settings
 
 		# *** tell Thor to not to run as task (no description necessary) by wrapping methods in a no_tasks do block ***
 
 		# get config settings from config file
 		no_tasks do
 			def self.settings
-				@@config_settings
+				@config_settings
 			end
 		end
 
 		# set config settings from config file
 		no_tasks do
 			def self.settings=(settings)
-				@@config_settings = YAML.load_file(settings)
-				return @@config_settings
+				@config_settings = YAML.load_file(settings)
+				return @config_settings
 			end
 		end
 

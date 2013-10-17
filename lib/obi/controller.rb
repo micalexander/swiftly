@@ -32,6 +32,8 @@ module Obi
 			case options.keys[0]
 			 when "wordpress"
 				project.wordpress
+			 when "empty"
+				project.empty
 			 end
 		end
 
