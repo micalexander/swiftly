@@ -11,3 +11,6 @@ delegate = Obi::Controller.new
 
 Obi::Controller.start
 
+# grab envioronment settings
+# local = Obi::Environment.new.environment_settings("local")
+# puts local[:name]

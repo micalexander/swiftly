@@ -2,7 +2,7 @@ require 'net/http'
 require 'fileutils'
 require 'git'
 require 'zip'
-require 'obi/MySQL'
+require 'obi/environment'
 
 module Obi
     class Project
@@ -79,8 +79,9 @@ module Obi
         end
 
         def empty
-            mysql = Obi::MySQL.new
-            mysql.mysql_credentials("production")
+            # environment = Obi::Environment.new
+            # puts environment.environment_settings("production")
+
         end
 
         def wordpress
@@ -188,10 +189,10 @@ module Obi
                 wp_config_replace_salt = File.read(File.join(@@project_path, "wp-config.php")).gsub(/\/\/\sInsert_Salts_Below/, source)
                 File.open(File.join(@@project_path, "wp-config.php"), "w") {|file| file.puts wp_config_replace_salt}
 
-                # define mySQL variables
-               find_config_value =  File.read( File.join( @@project_path,
+                # define WP_ENV variables
+                find_config_value =  File.read( File.join( @@project_path,
                         "wp-config.php"))[/\(\s*WP_ENV\s*==\s*'\s*local\s*'\s*\).*{[\s|\S]*?}/]
-               replace_config_value =  File.read( File.join( @@project_path,
+                replace_config_value =  File.read( File.join( @@project_path,
                         "wp-config.php"))[/\(\s*WP_ENV\s*==\s*'\s*local\s*'\s*\).*{[\s|\S]*?}/]
                 find_config_value.each_line do |line|
                     find_config_value.gsub!(/(('|")\s*DB_NAME\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@project_name}_local_wp#{$3}" }
