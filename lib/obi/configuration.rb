@@ -1,7 +1,10 @@
 require 'yaml'
+require 'obi/obi_module'
 
 module Obi
 	class Configuration
+
+		include FindAndReplace
 
 		@config_settings = YAML.load_file(CONFIG_FILE_LOCATION) unless defined? @config_settings
 
@@ -10,13 +13,11 @@ module Obi
 			@config_settings
 		end
 
-
 		# set config settings from config file
 		def self.settings=(settings)
 			@config_settings = YAML.load_file(settings)
 			return @config_settings
 		end
-
 
 		# update config variable values
 		def update_config_setting(setting_variable, setting_value=nil)
@@ -27,9 +28,7 @@ module Obi
 							setting = server_toggle(line.scan(/[^:]*$/)[0].strip)
 							setting_value = setting
 						end
-						obi_config = File.read(CONFIG_FILE_LOCATION)
-						obi_config.gsub!( /#{Regexp.escape(line)}/, "#{setting_variable}: #{setting_value}\n")
-						File.open(CONFIG_FILE_LOCATION, "w") {|file| file.puts obi_config}
+						find_and_replace(input: CONFIG_FILE_LOCATION, pattern: /#{Regexp.escape(line)}/, output: "#{setting_variable}: #{setting_value}\n", file: true)
 					end
 				end
 			end
