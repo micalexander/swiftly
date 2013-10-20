@@ -2,11 +2,13 @@ require 'Thor'
 require 'obi/Version'
 require 'obi/Menu'
 require 'obi/Project'
+require 'obi/obi_module'
 
 module Obi
 	class Controller < Thor
 		include Thor::Actions
 		include Obi::Version
+		include Obi::GetCurrentDirectory
 
 		# Handles the creation of the .obiconfig file
 		desc "config", "Maintain configuration variables"
@@ -60,6 +62,7 @@ module Obi
 		# method_option :production_to_staging, :aliases => "-ps", :type => :boolean, :desc => "Production to staging"
 
 		def database(project_name)
+			project_name = get_current_directory_basename(project_name)
 			if options.one?
 				if options[:local]
 					credentials = Obi::Environment.new.environment_settings('local', project_name)
@@ -92,7 +95,6 @@ module Obi
 					puts "obi: The -t --to option can not be passed as the first argument"
 					puts
 				end
-					# puts options.values
 			end
 		end
 	end

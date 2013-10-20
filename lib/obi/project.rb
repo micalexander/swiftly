@@ -8,7 +8,7 @@ require 'obi/obi_module'
 
 module Obi
     class Project
-        include FindAndReplace
+        include Obi::FindAndReplace
 
         attr_accessor :project_path, :project_name
 
