@@ -5,12 +5,6 @@ $:.unshift( APP_ROOT )
 
 CONFIG_FILE_LOCATION = File.absolute_path(".obiconfig")
 
-require 'obi/Controller'
+require 'obi/CLI'
 
-delegate = Obi::Controller.new
-
-Obi::Controller.start
-
-# grab envioronment settings
-# local = Obi::Environment.new.environment_settings("local")
-# puts local[:name]
+Obi::CLI.start

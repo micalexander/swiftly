@@ -5,10 +5,10 @@ require 'obi/Project'
 require 'obi/obi_module'
 
 module Obi
-	class Controller < Thor
+	class CLI < Thor
 		include Thor::Actions
 		include Obi::Version
-		include Obi::GetCurrentDirectory
+		include Obi::GetCurrentDirectoryBasename
 
 		# Handles the creation of the .obiconfig file
 		desc "config", "Maintain configuration variables"
@@ -51,50 +51,51 @@ module Obi
 		method_option :local, :aliases => "-l", :type => :boolean, :desc => "Local"
 		method_option :staging, :aliases => "-s", :type => :boolean, :desc => "Staging"
 		method_option :production, :aliases => "-p", :type => :boolean, :desc => "Production"
-		method_option :to, :aliases => "-t", :type => :boolean, :desc => "Direction"
+		method_option :lts, :type => :boolean, :desc => "Local to staging"
+		method_option :ltp, :type => :boolean, :desc => "Local to production"
+		method_option :stl, :type => :boolean, :desc => "Staging to local"
+		method_option :stp, :type => :boolean, :desc => "Staging to production"
+		method_option :ptl, :type => :boolean, :desc => "Production to local"
+		method_option :pts, :type => :boolean, :desc => "Production to staging"
 		method_option :import, :aliases => "-i", :type => :boolean, :desc => "Import into database"
 
-		# method_option :local_to_staging, :aliases => "-ls", :type => :boolean, :desc => "Local to staging"
-		# method_option :local_to_production, :aliases => "-lp", :type => :boolean, :desc => "Local to production"
-		# method_option :staging_to_local, :aliases => "-sl", :type => :boolean, :desc => "Staging to local"
-		# method_option :staging_to_production, :aliases => "-sp", :type => :boolean, :desc => "Staging to production"
-		# method_option :production_to_local, :aliases => "-pl", :type => :boolean, :desc => "Production to local"
-		# method_option :production_to_staging, :aliases => "-ps", :type => :boolean, :desc => "Production to staging"
-
-		def database(project_name)
+		def database(project_name, path="")
 			project_name = get_current_directory_basename(project_name)
 			if options.one?
 				if options[:local]
-					credentials = Obi::Environment.new.environment_settings('local', project_name)
+					credentials = Obi::Environment.new.environment_settings(project_name, options.keys[0])
 					database = Obi::Database.new(project_name, credentials)
 					database.dump
 				elsif options[:staging]
-					credentials = Obi::Environment.new.environment_settings('staging', project_name)
+					credentials = Obi::Environment.new.environment_settings(project_name, options.keys[0])
 					database = Obi::Database.new(project_name, credentials)
 					database.dump
 				elsif options[:production]
-					puts options[:production]
-				elsif options[:import]
-					puts options[:import]
+					credentials = Obi::Environment.new.environment_settings(project_name, options.keys[0])
+					database = Obi::Database.new(project_name, credentials)
+					database.dump
 				else
-					puts
-					puts "obi: The -t --to option can not be passed as the first argument"
-					puts
+					say
+					say "obi: The --#{options.keys[0]} option can not be passed by itself"
+					say
 				end
 			else
-				if options[:local]
-					puts options[:local]
-				elsif options[:staging]
-					puts options[:staging]
-				elsif options[:production]
-					puts options[:production]
-				elsif options[:import]
-					puts options[:import]
-				else
-					puts
-					puts "obi: The -t --to option can not be passed as the first argument"
-					puts
+				if options.include? "import"
+					puts options.keys
 				end
+				# if options[:local]
+				# 	puts options[:local]
+				# elsif options[:staging]
+				# 	puts options[:staging]
+				# elsif options[:production]
+				# 	puts options[:production]
+				# elsif options[:import]
+				# 	puts options[:import]
+				# elsif options[:to]
+				# 	puts
+				# 	puts "obi: The -t --to option can not be passed as the first argument"
+				# 	puts
+				# end
 			end
 		end
 	end

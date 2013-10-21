@@ -3,7 +3,7 @@
 module Obi
 	class Database
 
-		attr_accessor :mysql_special_characters, :sql_path, :credentials, :timestamp, :local_config_settings, :ssh_status, :ssh_user
+		attr_accessor :mysql_special_characters, :sql_path, :sql_file, :credentials, :timestamp, :local_config_settings, :ssh_status, :ssh_user
 
 		def initialize(project_name, credentials)
             @config_settings = Obi::Configuration.settings
@@ -28,7 +28,8 @@ module Obi
 			end
 		end
 
-		def import
+		def import(sql_file)
+			@sql_file = sql_file
 			if @credentials[:environment] != "local" and @ssh_status != 0
 				`ssh -C #{@ssh_user} mysql -u"#{@credentials[:user]}" -p"#{@credentials[:pass]}" "#{@credentials[:name]}" < "#{@sql_file}"`
 			else

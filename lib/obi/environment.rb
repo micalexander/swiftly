@@ -5,14 +5,14 @@ module Obi
 			@config_settings = Obi::Configuration.settings
 		end
 
-		def environment_settings(environment, project_name)
+		def environment_settings(project_name, environment)
 			@environment = environment
 			@project_name = project_name
 			@environment_setting = @config_settings["#{@environment}_settings"]
 			case @environment_setting
 			when "enabled"
 				# load the obiconfig file environment settings
-				environment_settings  =  {
+				environment_settings  = {
 										host: "#{@config_settings["#{@environment}_host"]}",
 										user: "#{@config_settings["#{@environment}_user"]}",
 										pass: "#{@config_settings["#{@environment}_password"]}",
