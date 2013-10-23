@@ -46,8 +46,11 @@ module Obi
 			end
 		end
 
-		desc "database [option] [project_name]", "Backup a projects database by passing a project name"
+		desc "database [option] [project_name]", "Maintain your databases by passing a project name"
 
+		method_option :backup, :aliases => "-b", :type => :boolean, :desc => "Backup database"
+		method_option :import, :aliases => "-i", :type => :boolean, :desc => "Import file into database"
+		method_option :sync, :aliases => "-y", :type => :boolean, :desc => "Sync two databases"
 		method_option :local, :aliases => "-l", :type => :boolean, :desc => "Local"
 		method_option :staging, :aliases => "-s", :type => :boolean, :desc => "Staging"
 		method_option :production, :aliases => "-p", :type => :boolean, :desc => "Production"
@@ -57,46 +60,115 @@ module Obi
 		method_option :stp, :type => :boolean, :desc => "Staging to production"
 		method_option :ptl, :type => :boolean, :desc => "Production to local"
 		method_option :pts, :type => :boolean, :desc => "Production to staging"
-		method_option :import, :aliases => "-i", :type => :boolean, :desc => "Import into database"
 
-		def database(project_name, path="")
+
+		def database(project_name, sql_file_path="")
 			project_name = get_current_directory_basename(project_name)
-			if options.one?
+			if options.keys.count == 2 and options[:backup]
 				if options[:local]
-					credentials = Obi::Environment.new.environment_settings(project_name, options.keys[0])
-					database = Obi::Database.new(project_name, credentials)
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "local")
+					database = Obi::Database.new(project_name, origin_credentials)
 					database.dump
 				elsif options[:staging]
-					credentials = Obi::Environment.new.environment_settings(project_name, options.keys[0])
-					database = Obi::Database.new(project_name, credentials)
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
+					database = Obi::Database.new(project_name, origin_credentials)
 					database.dump
 				elsif options[:production]
-					credentials = Obi::Environment.new.environment_settings(project_name, options.keys[0])
-					database = Obi::Database.new(project_name, credentials)
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "production")
+					database = Obi::Database.new(project_name, origin_credentials)
 					database.dump
 				else
 					say
 					say "obi: The --#{options.keys[0]} option can not be passed by itself"
 					say
 				end
-			else
-				if options.include? "import"
-					puts options.keys
+			elsif options.keys.count == 2 and options[:import] and !sql_file_path.empty?
+				if options[:local]
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "local")
+					database = Obi::Database.new(project_name, destination_credentials, destination_credentials)
+					database.import(sql_file_path)
+				elsif options[:staging]
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
+					database = Obi::Database.new(project_name, destination_credentials, destination_credentials)
+					database.import(sql_file_path)
+				elsif options[:production]
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "production")
+					database = Obi::Database.new(project_name, destination_credentials, destination_credentials)
+					database.import(sql_file_path)
+				elsif options[:lts]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "local")
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
+					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
+					database.import(sql_file_path)
+				elsif options[:ltp]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "local")
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "production")
+					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
+					database.import(sql_file_path)
+				elsif options[:stl]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "local")
+					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
+					database.import(sql_file_path)
+				elsif options[:stp]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "production")
+					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
+					database.import(sql_file_path)
+				elsif options[:ptl]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "production")
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "local")
+					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
+					database.import(sql_file_path)
+				elsif options[:pts]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "production")
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
+					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
+					database.import(sql_file_path)
 				end
-				# if options[:local]
-				# 	puts options[:local]
-				# elsif options[:staging]
-				# 	puts options[:staging]
-				# elsif options[:production]
-				# 	puts options[:production]
-				# elsif options[:import]
-				# 	puts options[:import]
-				# elsif options[:to]
-				# 	puts
-				# 	puts "obi: The -t --to option can not be passed as the first argument"
-				# 	puts
-				# end
+			elsif options.keys.count == 2 and options[:sync]
+				if options[:lts]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "local")
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
+					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
+					database.sync
+				elsif options[:ltp]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "local")
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "production")
+					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
+					database.sync
+				elsif options[:stl]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "local")
+					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
+					database.sync
+				elsif options[:stp]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "production")
+					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
+					database.sync
+				elsif options[:ptl]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "production")
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "local")
+					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
+					database.sync
+				elsif options[:pts]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "production")
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
+					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
+					database.sync
+				end
+			else
+				say
+				say "obi: I dont understand what you are trying to do";
+				say
+				say `lib/obi3 -h database`
+				say
 			end
 		end
+		no_tasks do
+			alias_method :d, :database
+		end
+
 	end
 end

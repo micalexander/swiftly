@@ -176,8 +176,8 @@ module Obi
                                      .gsub!(/(('|")\s*DB_USER\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@config_settings['local_user']}#{$3}" }
                                      .gsub!(/(('|")\s*DB_PASSWORD\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@config_settings['local_password']}#{$3}" }
                                      .gsub!(/(('|")\s*DB_HOST\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@config_settings['local_host']}#{$3}" }
-                                     .gsub!(/(('|")\s*WP_SITEURL\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@project_name}.dev#{$3}" }
-                                     .gsub!(/(('|")\s*WP_HOME\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@project_name}.dev#{$3}" }
+                                     .gsub!(/(('|")\s*WP_SITEURL\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}http://#{@project_name}.dev#{$3}" }
+                                     .gsub!(/(('|")\s*WP_HOME\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}http://#{@project_name}.dev#{$3}" }
                 end
                 # - put the wp-config file in memory
                 wp_config = File.read(File.join(@project_path, "wp-config.php"))
@@ -186,7 +186,7 @@ module Obi
                          .gsub!(/mask/, "#{@project_name}")
                          .gsub!(Regexp.new(Regexp.escape(replace_config_value)), "#{find_config_value}")
                          .gsub!(/\/\/\s*Insert_Salts_Below/, Net::HTTP.get('api.wordpress.org', '/secret-key/1.1/salt'))
-                         .gsub!(/(table_prefix\s*=\s*')(wp_)'/) {"#{$1}#{@project_name[0,3]}_"}
+                         .gsub!(/(table_prefix\s*=\s*')(wp_')/) {"#{$1}#{@project_name[0,3]}_'"}
                 # - write to wp-config
                 File.open(File.join(@project_path, "wp-config.php"), "w") {|file| file.puts wp_config}
 
