@@ -65,27 +65,33 @@ module Obi
 		method_option :pts, :type => :boolean, :desc => "Production to staging"
 
 
-		def database(project_name, import_file="")
-			project_name = get_current_directory_basename(project_name)
+		def database( project_name, import_file = "" )
+
+			database = Obi::Database.new( get_current_directory_basename(project_name) )
+
+			# check to see if one of the options was backup
 			if options.keys.count == 2 and options[:backup]
+
+				# dump the specified database
 				if options[:local]
 					origin_credentials = Obi::Environment.new.environment_settings(project_name, "local")
-					database = Obi::Database.new(project_name, origin_credentials)
-					database.dump
+					database.dump( origin_credentials )
 				elsif options[:staging]
 					origin_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
-					database = Obi::Database.new(project_name, origin_credentials)
-					database.dump
+					database.dump( origin_credentials )
 				elsif options[:production]
 					origin_credentials = Obi::Environment.new.environment_settings(project_name, "production")
-					database = Obi::Database.new(project_name, origin_credentials)
-					database.dump
+					database.dump( origin_credentials )
 				else
 					say
 					say "obi: The --#{options.keys[0]} option can not be passed by itself"
 					say
 				end
+
+			# check to see if one of the options was import and a file was provided
 			elsif options.keys.count == 2 and options[:import] and !import_file.empty?
+
+				# get the necessary database credentials
 				if options[:local]
 					origin_credentials = Obi::Environment.new.environment_settings(project_name, "local")
 					destination_credentials = Obi::Environment.new.environment_settings(project_name, "local")
@@ -97,11 +103,16 @@ module Obi
 					destination_credentials = Obi::Environment.new.environment_settings(project_name, "production")
 				end
 
-				database = Obi::Database.new(project_name)
+				# dump the destination database first!
 				database.dump(origin_credentials)
+
+				# import the supplied file into the specified database
 				database.import(destination_credentials, import_file)
 
+			# checkt to see if one of the options was sync
 			elsif options.keys.count == 2 and options[:sync]
+
+				# get the necessary database credentials
 				if options[:lts]
 					origin_credentials = Obi::Environment.new.environment_settings(project_name, "local")
 					destination_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
@@ -122,8 +133,7 @@ module Obi
 					destination_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
 				end
 
-				database = Obi::Database.new(project_name)
-
+				# check to see if a file was provided if so find and replace urls and import it
 				if import_file.empty?
 					database.sync( origin_credentials, destination_credentials )
 				else
