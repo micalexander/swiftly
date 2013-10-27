@@ -4,6 +4,7 @@ require 'obi/Menu'
 require 'obi/Project'
 require 'obi/obi_module'
 
+
 module Obi
 	class CLI < Thor
 		include Thor::Actions
@@ -45,7 +46,9 @@ module Obi
 				puts
 			end
 		end
-
+		no_tasks do
+			alias_method :n, :new
+		end
 		desc "database [option] [project_name]", "Maintain your databases by passing a project name"
 
 		method_option :backup, :aliases => "-b", :type => :boolean, :desc => "Backup database"
@@ -62,7 +65,7 @@ module Obi
 		method_option :pts, :type => :boolean, :desc => "Production to staging"
 
 
-		def database(project_name, sql_file_path="")
+		def database(project_name, import_file="")
 			project_name = get_current_directory_basename(project_name)
 			if options.keys.count == 2 and options[:backup]
 				if options[:local]
@@ -82,85 +85,53 @@ module Obi
 					say "obi: The --#{options.keys[0]} option can not be passed by itself"
 					say
 				end
-			elsif options.keys.count == 2 and options[:import] and !sql_file_path.empty?
+			elsif options.keys.count == 2 and options[:import] and !import_file.empty?
 				if options[:local]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "local")
 					destination_credentials = Obi::Environment.new.environment_settings(project_name, "local")
-					database = Obi::Database.new(project_name, destination_credentials, destination_credentials)
-					database.import(sql_file_path)
 				elsif options[:staging]
+					origin_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
 					destination_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
-					database = Obi::Database.new(project_name, destination_credentials, destination_credentials)
-					database.import(sql_file_path)
 				elsif options[:production]
-					destination_credentials = Obi::Environment.new.environment_settings(project_name, "production")
-					database = Obi::Database.new(project_name, destination_credentials, destination_credentials)
-					database.import(sql_file_path)
-				elsif options[:lts]
-					origin_credentials = Obi::Environment.new.environment_settings(project_name, "local")
-					destination_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
-					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
-					database.import(sql_file_path)
-				elsif options[:ltp]
-					origin_credentials = Obi::Environment.new.environment_settings(project_name, "local")
-					destination_credentials = Obi::Environment.new.environment_settings(project_name, "production")
-					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
-					database.import(sql_file_path)
-				elsif options[:stl]
-					origin_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
-					destination_credentials = Obi::Environment.new.environment_settings(project_name, "local")
-					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
-					database.import(sql_file_path)
-				elsif options[:stp]
-					origin_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
-					destination_credentials = Obi::Environment.new.environment_settings(project_name, "production")
-					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
-					database.import(sql_file_path)
-				elsif options[:ptl]
 					origin_credentials = Obi::Environment.new.environment_settings(project_name, "production")
-					destination_credentials = Obi::Environment.new.environment_settings(project_name, "local")
-					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
-					database.import(sql_file_path)
-				elsif options[:pts]
-					origin_credentials = Obi::Environment.new.environment_settings(project_name, "production")
-					destination_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
-					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
-					database.import(sql_file_path)
+					destination_credentials = Obi::Environment.new.environment_settings(project_name, "production")
 				end
+
+				database = Obi::Database.new(project_name)
+				database.dump(origin_credentials)
+				database.import(destination_credentials, import_file)
+
 			elsif options.keys.count == 2 and options[:sync]
 				if options[:lts]
 					origin_credentials = Obi::Environment.new.environment_settings(project_name, "local")
 					destination_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
-					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
-					database.sync
 				elsif options[:ltp]
 					origin_credentials = Obi::Environment.new.environment_settings(project_name, "local")
 					destination_credentials = Obi::Environment.new.environment_settings(project_name, "production")
-					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
-					database.sync
 				elsif options[:stl]
 					origin_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
 					destination_credentials = Obi::Environment.new.environment_settings(project_name, "local")
-					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
-					database.sync
 				elsif options[:stp]
 					origin_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
 					destination_credentials = Obi::Environment.new.environment_settings(project_name, "production")
-					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
-					database.sync
 				elsif options[:ptl]
 					origin_credentials = Obi::Environment.new.environment_settings(project_name, "production")
 					destination_credentials = Obi::Environment.new.environment_settings(project_name, "local")
-					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
-					database.sync
 				elsif options[:pts]
 					origin_credentials = Obi::Environment.new.environment_settings(project_name, "production")
 					destination_credentials = Obi::Environment.new.environment_settings(project_name, "staging")
-					database = Obi::Database.new(project_name, origin_credentials, destination_credentials)
-					database.sync
+				end
+
+				database = Obi::Database.new(project_name)
+
+				if import_file.empty?
+					database.sync( origin_credentials, destination_credentials )
+				else
+					database.sync( origin_credentials, destination_credentials, import_file )
 				end
 			else
 				say
-				say "obi: I dont understand what you are trying to do";
+				say "obi: Not sure what you are trying to do";
 				say
 				say `lib/obi3 -h database`
 				say

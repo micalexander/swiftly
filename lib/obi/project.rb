@@ -198,8 +198,8 @@ module Obi
                                 name: "#{@project_name}_local_wp",
                                 environment: "local"
                                 }
-                database = Obi::Database.new(@project_name, credentials)
-                database.create
+                database = Obi::Database.new(@project_name)
+                database.create(credentials)
                 # enable git repository
                 enable_git
             end
