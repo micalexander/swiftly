@@ -1,5 +1,5 @@
 require 'Thor'
-require 'obi/Version'
+require 'obi/configuration'
 require 'obi/Menu'
 require 'obi/Project'
 require 'obi/obi_module'
@@ -8,20 +8,13 @@ require 'obi/obi_module'
 module Obi
 	class CLI < Thor
 		include Thor::Actions
-		include Obi::Version
 		include Obi::GetCurrentDirectoryBasename
 
 		# Handles the creation of the .obiconfig file
 		desc "config", "Maintain configuration variables"
 		def config
-			if (!File.exist?( CONFIG_FILE_LOCATION ))
-				File.open( CONFIG_FILE_LOCATION, 'w') do |file|
-					file.puts VERSION
-				end
-			else
-				menu = Obi::Menu.new
-				menu.launch_menu!
-			end
+			Configuration.check
+			Menu.new.launch!
 		end
 
 		desc "new [option] [project_name]", "Create a new projects by passing a project name"

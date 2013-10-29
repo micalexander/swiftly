@@ -6,7 +6,6 @@ module Obi
 		end
 
 		def environment_settings(project_name, environment)
-			p
 			@environment = environment
 			@project_name = project_name
 			@environment_setting = @config_settings["#{@environment}_settings"]

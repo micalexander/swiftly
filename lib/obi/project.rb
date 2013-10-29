@@ -49,7 +49,14 @@ module Obi
         def initialize(project_name)
             @config_settings = Obi::Configuration.settings
             @project_name = project_name
-            @project_path = File.join( @config_settings['local_project_directory'], @project_name )
+            if  File.directory?(@config_settings['local_project_directory'].to_s)
+                @project_path = File.join( @config_settings['local_project_directory'], @project_name )
+            else
+                abort "\nobi: Please run obi config and set your project working directory and any other necessary settings.\n\n"
+            end
+            if @config_settings['local_host'] == 0 or @config_settings['local_user'] == 0 or @config_settings['local_password'] == 0 or @config_settings['local_settings'] == 0
+                abort "\nobi: Please run obi config and verify that all of your local environment settings are set.\n\n"
+            end
         end
 
 
@@ -182,7 +189,10 @@ module Obi
                 # - put the wp-config file in memory
                 wp_config = File.read(File.join(@project_path, "wp-config.php"))
                 # - find and replace remaining values on the the wp-config
-                wp_config.gsub!(/staging_tld/, @config_settings['staging_domain'].gsub(/\./){ |match| "\\" + match  })
+                if @config_settings['staging_domain'] == 0
+                    staging_url = "changeme.dev"
+                end
+                wp_config.gsub!(/staging_tld/, staging_url.gsub(/\./){ |match| "\\" + match  })
                          .gsub!(/mask/, "#{@project_name}")
                          .gsub!(Regexp.new(Regexp.escape(replace_config_value)), "#{find_config_value}")
                          .gsub!(/\/\/\s*Insert_Salts_Below/, Net::HTTP.get('api.wordpress.org', '/secret-key/1.1/salt'))
