@@ -2,7 +2,7 @@ require "obi/version"
 require "thor/group"
 
 module Obi
-	class GlobalConfigGenerator < Thor::Group
+	class GlobalConfig < Thor::Group
 
 		include Obi::Version
 		include Thor::Actions

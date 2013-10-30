@@ -1,3 +1,4 @@
+require 'obi/project_config'
 require 'net/http'
 require 'fileutils'
 require 'git'
@@ -68,9 +69,7 @@ module Obi
                 dumps_paths = dumps_path_str.match(/\{(.*)\}/)[1].split(',').map {|s| "#{@project_path}/_resources/dumps/" << s }
                 FileUtils.mkdir_p [asset_paths, dumps_paths], {:noop => false, :verbose => false}
                 FileUtils.mkdir File.join(@project_path, ".obi"), {:noop => false, :verbose => false}
-                File.open(File.join( @project_path, ".obi", "config"), "w") do |file|
-                    file.puts "#\n# Production ssh settings\n#\n\nenable_production_ssh: 0\nproduction_ssh: 0\nproduction_remote_project_root: 0\nenable_production_ssh_sql: 0\n\n#\n# Staging ssh settings\n#\n\nenable_staging_ssh: 0\nstaging_ssh: 0\nstaging_remote_project_root: 0\nenable_staging_ssh_sql: 0\n\n#\n# S3 settings\n#\n\nenable_S3: 0\npublic_key: 0\nsecret_key: 0\nmybucket: 0\n\n#\n# RSync settings\n#\n\nenable_rsync: 0\nrsync_dirs:\n - /change/this/to/first/sync/directory/\n - /change/this/to/second/sync/directory/or/remove/entirely/"
-                end
+                ProjectConfig.new.create(@project_path)
                 File.open(File.join( @project_path, ".obiignore"), "w") { |file| file.puts ".git\n.gitignore\n.htaccess\nsftp-config.json\n.DS_Store\n_resources\n.obi" }
             else
                 puts ""
@@ -191,6 +190,8 @@ module Obi
                 # - find and replace remaining values on the the wp-config
                 if @config_settings['staging_domain'] == 0
                     staging_url = "changeme.dev"
+                else
+                    staging_url = @config_settings['staging_domain']
                 end
                 wp_config.gsub!(/staging_tld/, staging_url.gsub(/\./){ |match| "\\" + match  })
                          .gsub!(/mask/, "#{@project_name}")
