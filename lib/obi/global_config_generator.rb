@@ -2,7 +2,7 @@ require "obi/version"
 require "thor/group"
 
 module Obi
-	class ConfigGenerator < Thor::Group
+	class GlobalConfigGenerator < Thor::Group
 
 		include Obi::Version
 		include Thor::Actions
@@ -15,7 +15,7 @@ module Obi
 
 		def create
 			@version = VERSION
-			template "templates/config.erb", ".obiconfig"
+			template "templates/global_config.erb", ".obiconfig"
 		end
 	end
 end

@@ -1,4 +1,4 @@
-require 'obi/config_generator'
+require 'obi/global_config_generator'
 require 'obi/version'
 require 'yaml'
 require 'obi/obi_module'
@@ -37,7 +37,7 @@ module Obi
 
 		# create config file
 		def self.create
-			ConfigGenerator.new.create
+			GlobalConfigGenerator.new.create
 		end
 
 		# update config variable values
