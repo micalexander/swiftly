@@ -27,9 +27,9 @@ module Obi
 			project = Obi::Project.new(project_name)
 			if options.one?
 				if options[:empty]
-					# project.empty
+					project.empty
 				elsif options[:git]
-					# project.git
+					project.git
 				elsif options[:wordpress]
 					project.wordpress
 				end

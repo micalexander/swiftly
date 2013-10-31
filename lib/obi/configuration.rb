@@ -27,6 +27,14 @@ module Obi
 			return @@config_settings
 		end
 
+		def self.config_settings_check
+		    if !File.directory?(@@config_settings['local_project_directory'].to_s)
+                abort "\nobi: Please run obi config and set your project working directory and any other necessary settings.\n\n"
+            elsif @@config_settings['local_host'] == 0 or @@config_settings['local_user'] == 0 or @@config_settings['local_password'] == 0 or @@config_settings['local_settings'] == 0
+                abort "\nobi: Please run obi config and verify that all of your local environment settings are set.\n\n"
+            end
+		end
+
 		# check to see if global config file has been created
 		def self.check
 			unless File.exist?(File.absolute_path(".obiconfig"))

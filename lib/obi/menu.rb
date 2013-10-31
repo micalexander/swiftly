@@ -61,8 +61,11 @@ module Obi
 					print "> "
 					user_response = $stdin.gets.chomp.rstrip.gsub(/\\/, "" )
 					if setting_variable =~ /local_project_directory/
+						puts setting_variable
 						if !File.directory?(user_response)
 							confirmation = "Your input was was not a directory so there has been no change:"
+						else
+							configuration.update_config_setting(setting_variable, user_response)
 						end
 					elsif user_response.nil? or user_response == 0 or user_response.empty?
 						confirmation = "Your input was empty therefore there has been no change:"

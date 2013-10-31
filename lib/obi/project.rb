@@ -50,16 +50,10 @@ module Obi
         def initialize(project_name)
             @config_settings = Obi::Configuration.settings
             @project_name = project_name
-            if  File.directory?(@config_settings['local_project_directory'].to_s)
-                @project_path = File.join( @config_settings['local_project_directory'], @project_name )
-            else
-                abort "\nobi: Please run obi config and set your project working directory and any other necessary settings.\n\n"
-            end
-            if @config_settings['local_host'] == 0 or @config_settings['local_user'] == 0 or @config_settings['local_password'] == 0 or @config_settings['local_settings'] == 0
-                abort "\nobi: Please run obi config and verify that all of your local environment settings are set.\n\n"
-            end
-        end
+            Obi::Configuration.config_settings_check
+            @project_path = File.join( @config_settings['local_project_directory'], @project_name )
 
+        end
 
         def create_directories
             if !File.directory?(@project_path)
@@ -75,7 +69,7 @@ module Obi
                 puts ""
                 puts "obi: There is already a project with the name \"#{@project_name}\". Please try again."
                 puts ""
-                return false
+                exit
             end
         end
 
@@ -87,133 +81,136 @@ module Obi
         end
 
         def empty
-            database = Obi::Database.new
-            puts database.escape_special_characters(@config_settings['local_password'])
+            create_directories
+        end
+
+        def git
+            create_directories
+            enable_git
         end
 
         def wordpress
-            returned_value = create_directories
 
-            if returned_value != false
+            create_directories
 
-                # download wordpress and place it in the project directory
-                wordpress = RedirectFollower.new('http://wordpress.org/latest.zip').resolve
-                File.open(File.join( @project_path, "latest.zip"), "w") do |file|
-                    file.write wordpress.body
-                end
-
-                # unzip the wordpress zip file
-                zipfile_name = File.join(@project_path, 'latest.zip')
-                Zip::File.open(zipfile_name) do |zipfile|
-                    # entry is an instance of Zip::ZipEntry
-                    zipfile.each do |entry|
-                        entry_file_path = File.join(@project_path , entry.to_s)
-                        # FileUtils.mkdir_p(File.dirname(entry_file_path))
-                        zipfile.extract(entry, entry_file_path)
-                    end
-                end
-
-                # remove wordpress folder and zip file
-                FileUtils.rm(File.join(@project_path, 'latest.zip'))
-                FileUtils.mv( Dir[File.join(@project_path, 'wordpress/*')], @project_path )
-                FileUtils.rmdir(File.join(@project_path, 'wordpress'))
-
-                # download the mask framwork
-                # get_mask
-                mask = RedirectFollower.new('https://github.com/micalexander/mask/archive/master.zip').resolve
-                File.open(File.join( @project_path, "wp-content", "themes", "master.zip"), "w") do |file|
-                    file.write mask.body
-                end
-
-                # unzip the mask zip file
-                zipfile_name = File.join(@project_path, "wp-content", "themes","master.zip")
-                Zip::File.open(zipfile_name) do |zipfile|
-                    # entry is an instance of Zip::ZipEntry
-                    zipfile.each do |entry|
-                        entry_file_path = File.join(@project_path, "wp-content", "themes", entry.to_s)
-                        # FileUtils.mkdir_p(File.dirname(entry_file_path))
-                        zipfile.extract(entry, entry_file_path)
-                    end
-                end
-
-                # remove mask folder and zip file
-                FileUtils.rm(File.join(@project_path, "wp-content", "themes", "master.zip"))
-                FileUtils.mv(File.join(@project_path, "wp-content", "themes", "mask-master"), File.join(@project_path, "wp-content", "themes", "#{@project_name}"))
-
-                # move the wp-config, .htaccess, Guardfile, Gemfile, and Gemfile.lock files to the site root
-                FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", ".htaccess"), @project_path )
-                FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "wp-config.php"), @project_path )
-                FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Guardfile"), @project_path )
-                FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile"), @project_path )
-                FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile.lock"), @project_path )
-
-                # remove sample wp-config
-                FileUtils.rm(File.join(@project_path, "wp-config-sample.php"))
-
-                # move site specific plugin to the plugins folder
-                FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "mask-specific-plugin"), File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin"))
-                FileUtils.mv(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin",  "mask-plugin.php"), File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"))
-
-                # find and replace the mask name with the project name
-                FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-mask.png"), File.join(@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-#{@project_name}.png"))
-
-                # find and replace the mask name with the project name
-                # - text to find and replace
-                plugin_replace = File.read(File.join(@project_path, "wp-content", "plugins",
-                    "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/mask/, "#{@project_name}".capitalize)
-                function_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php")).gsub(/mask/, "#{@project_name}")
-                guard_replace = File.read(File.join(@project_path, "Guardfile")).gsub(/mask/, "#{@project_name}")
-                ie_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss")).gsub(/mask/, "#{@project_name}")
-                # - open file and perform find and replace
-                File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
-                    file.puts plugin_replace }
-                File.open(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php"), "w") { |file| file.puts function_replace }
-                File.open(File.join(@project_path, "Guardfile"), "w") { |file| file.puts guard_replace }
-                File.open(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss"), "w") { |file| file.puts ie_replace }
-
-                # find and replace variables on wp-config file
-                # - define WP_ENV variables
-                find_config_value =  File.read( File.join( @project_path,
-                        "wp-config.php"))[/\(\s*WP_ENV\s*==\s*'\s*local\s*'\s*\).*{[\s|\S]*?}/]
-                replace_config_value =  File.read( File.join( @project_path,
-                        "wp-config.php"))[/\(\s*WP_ENV\s*==\s*'\s*local\s*'\s*\).*{[\s|\S]*?}/]
-                find_config_value.each_line do |line|
-                    find_config_value.gsub!(/(('|")\s*DB_NAME\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@project_name}_local_wp#{$3}" }
-                                     .gsub!(/(('|")\s*DB_USER\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@config_settings['local_user']}#{$3}" }
-                                     .gsub!(/(('|")\s*DB_PASSWORD\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@config_settings['local_password']}#{$3}" }
-                                     .gsub!(/(('|")\s*DB_HOST\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@config_settings['local_host']}#{$3}" }
-                                     .gsub!(/(('|")\s*WP_SITEURL\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}http://#{@project_name}.dev#{$3}" }
-                                     .gsub!(/(('|")\s*WP_HOME\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}http://#{@project_name}.dev#{$3}" }
-                end
-                # - put the wp-config file in memory
-                wp_config = File.read(File.join(@project_path, "wp-config.php"))
-                # - find and replace remaining values on the the wp-config
-                if @config_settings['staging_domain'] == 0
-                    staging_url = "changeme.dev"
-                else
-                    staging_url = @config_settings['staging_domain']
-                end
-                wp_config.gsub!(/staging_tld/, staging_url.gsub(/\./){ |match| "\\" + match  })
-                         .gsub!(/mask/, "#{@project_name}")
-                         .gsub!(Regexp.new(Regexp.escape(replace_config_value)), "#{find_config_value}")
-                         .gsub!(/\/\/\s*Insert_Salts_Below/, Net::HTTP.get('api.wordpress.org', '/secret-key/1.1/salt'))
-                         .gsub!(/(table_prefix\s*=\s*')(wp_')/) {"#{$1}#{@project_name[0,3]}_'"}
-                # - write to wp-config
-                File.open(File.join(@project_path, "wp-config.php"), "w") {|file| file.puts wp_config}
-
-                # Create project's database
-                credentials =   {
-                                host: "#{@config_settings['local_host']}",
-                                user: "#{@config_settings['local_user']}",
-                                pass: "#{@config_settings['local_password']}",
-                                name: "#{@project_name}_local_wp",
-                                environment: "local"
-                                }
-                database = Obi::Database.new(@project_name)
-                database.create(credentials)
-                # enable git repository
-                enable_git
+            # download wordpress and place it in the project directory
+            wordpress = RedirectFollower.new('http://wordpress.org/latest.zip').resolve
+            File.open(File.join( @project_path, "latest.zip"), "w") do |file|
+                file.write wordpress.body
             end
+
+            # unzip the wordpress zip file
+            zipfile_name = File.join(@project_path, 'latest.zip')
+            Zip::File.open(zipfile_name) do |zipfile|
+                # entry is an instance of Zip::ZipEntry
+                zipfile.each do |entry|
+                    entry_file_path = File.join(@project_path , entry.to_s)
+                    # FileUtils.mkdir_p(File.dirname(entry_file_path))
+                    zipfile.extract(entry, entry_file_path)
+                end
+            end
+
+            # remove wordpress folder and zip file
+            FileUtils.rm(File.join(@project_path, 'latest.zip'))
+            FileUtils.mv( Dir[File.join(@project_path, 'wordpress/*')], @project_path )
+            FileUtils.rmdir(File.join(@project_path, 'wordpress'))
+
+            # download the mask framwork
+            # get_mask
+            mask = RedirectFollower.new('https://github.com/micalexander/mask/archive/master.zip').resolve
+            File.open(File.join( @project_path, "wp-content", "themes", "master.zip"), "w") do |file|
+                file.write mask.body
+            end
+
+            # unzip the mask zip file
+            zipfile_name = File.join(@project_path, "wp-content", "themes","master.zip")
+            Zip::File.open(zipfile_name) do |zipfile|
+                # entry is an instance of Zip::ZipEntry
+                zipfile.each do |entry|
+                    entry_file_path = File.join(@project_path, "wp-content", "themes", entry.to_s)
+                    # FileUtils.mkdir_p(File.dirname(entry_file_path))
+                    zipfile.extract(entry, entry_file_path)
+                end
+            end
+
+            # remove mask folder and zip file
+            FileUtils.rm(File.join(@project_path, "wp-content", "themes", "master.zip"))
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "mask-master"), File.join(@project_path, "wp-content", "themes", "#{@project_name}"))
+
+            # move the wp-config, .htaccess, Guardfile, Gemfile, and Gemfile.lock files to the site root
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", ".htaccess"), @project_path )
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "wp-config.php"), @project_path )
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Guardfile"), @project_path )
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile"), @project_path )
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile.lock"), @project_path )
+
+            # remove sample wp-config
+            FileUtils.rm(File.join(@project_path, "wp-config-sample.php"))
+
+            # move site specific plugin to the plugins folder
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "mask-specific-plugin"), File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin"))
+            FileUtils.mv(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin",  "mask-plugin.php"), File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"))
+
+            # find and replace the mask name with the project name
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-mask.png"), File.join(@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-#{@project_name}.png"))
+
+            # find and replace the mask name with the project name
+            # - text to find and replace
+            plugin_replace = File.read(File.join(@project_path, "wp-content", "plugins",
+                "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/mask/, "#{@project_name}".capitalize)
+            function_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php")).gsub(/mask/, "#{@project_name}")
+            guard_replace = File.read(File.join(@project_path, "Guardfile")).gsub(/mask/, "#{@project_name}")
+            ie_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss")).gsub(/mask/, "#{@project_name}")
+            # - open file and perform find and replace
+            File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
+                file.puts plugin_replace }
+            File.open(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php"), "w") { |file| file.puts function_replace }
+            File.open(File.join(@project_path, "Guardfile"), "w") { |file| file.puts guard_replace }
+            File.open(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss"), "w") { |file| file.puts ie_replace }
+
+            # find and replace variables on wp-config file
+            # - define WP_ENV variables
+            find_config_value =  File.read( File.join( @project_path,
+                    "wp-config.php"))[/\(\s*WP_ENV\s*==\s*'\s*local\s*'\s*\).*{[\s|\S]*?}/]
+            replace_config_value =  File.read( File.join( @project_path,
+                    "wp-config.php"))[/\(\s*WP_ENV\s*==\s*'\s*local\s*'\s*\).*{[\s|\S]*?}/]
+            find_config_value.each_line do |line|
+                find_config_value.gsub!(/(('|")\s*DB_NAME\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@project_name}_local_wp#{$3}" }
+                                 .gsub!(/(('|")\s*DB_USER\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@config_settings['local_user']}#{$3}" }
+                                 .gsub!(/(('|")\s*DB_PASSWORD\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@config_settings['local_password']}#{$3}" }
+                                 .gsub!(/(('|")\s*DB_HOST\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}#{@config_settings['local_host']}#{$3}" }
+                                 .gsub!(/(('|")\s*WP_SITEURL\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}http://#{@project_name}.dev#{$3}" }
+                                 .gsub!(/(('|")\s*WP_HOME\s*'\s*,\s*('|"))([\s|\S]*?)('|")/) { "#{$1}http://#{@project_name}.dev#{$3}" }
+            end
+            # - put the wp-config file in memory
+            wp_config = File.read(File.join(@project_path, "wp-config.php"))
+            # - find and replace remaining values on the the wp-config
+            if @config_settings['staging_domain'] == 0
+                staging_url = "changeme.dev"
+            else
+                staging_url = @config_settings['staging_domain']
+            end
+            wp_config.gsub!(/staging_tld/, staging_url.gsub(/\./){ |match| "\\" + match  })
+                     .gsub!(/mask/, "#{@project_name}")
+                     .gsub!(Regexp.new(Regexp.escape(replace_config_value)), "#{find_config_value}")
+                     .gsub!(/\/\/\s*Insert_Salts_Below/, Net::HTTP.get('api.wordpress.org', '/secret-key/1.1/salt'))
+                     .gsub!(/(table_prefix\s*=\s*')(wp_')/) {"#{$1}#{@project_name[0,3]}_'"}
+            # - write to wp-config
+            File.open(File.join(@project_path, "wp-config.php"), "w") {|file| file.puts wp_config}
+
+            # Create project's database
+            credentials =   {
+                            host: "#{@config_settings['local_host']}",
+                            user: "#{@config_settings['local_user']}",
+                            pass: "#{@config_settings['local_password']}",
+                            name: "#{@project_name}_local_wp",
+                            environment: "local"
+                            }
+            database = Obi::Database.new(@project_name)
+            database.create(credentials)
+            # enable git repository
+            enable_git
+
         end
     end
 end
