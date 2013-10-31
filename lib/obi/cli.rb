@@ -39,9 +39,50 @@ module Obi
 				puts
 			end
 		end
+
 		no_tasks do
 			alias_method :n, :new
 		end
+
+		desc "destroy [option] [project_name]", "Remove a projects by passing a project name"
+
+		# method_option :empty, :aliases => "-e", :type => :boolean, :desc => "Create an empty project"
+		# method_option :git, :aliases => "-g", :type => :boolean, :desc => "Create a Git enabled project"
+		# method_option :wordpress, :aliases => "-w", :type => :boolean, :desc => "Create a project with Wordpress installed"
+
+		def kill(project_name)
+
+			database = Obi::Database.new(project_name)
+			credentials = Obi::Environment.new
+
+			database.dump( credentials.environment_settings( project_name, "local" ) )
+			database.drop( credentials.environment_settings( project_name, "local" ) )
+
+		 	directory = File.join( Obi::Configuration.settings['local_project_directory'], project_name + '/' )
+		 	zipfile_name = File.join( Obi::Configuration.settings['local_project_directory'], project_name + '.zip' )
+
+		 	if File.exist? zipfile_name
+
+			 	puts ""
+			 	puts "obi: Can't zip directory. There is already a zip file named [ #{project_name}.zip ]"
+			 	puts ""
+			 	exit
+
+		 	else
+
+				Zip::File.open(zipfile_name, Zip::File::CREATE) do |zipfile|
+				    Dir[File.join(directory, '**', '**')].each do |file|
+				      zipfile.add(file.sub(directory, ''), file)
+				    end
+				end
+				FileUtils.remove_dir( File.join( Obi::Configuration.settings['local_project_directory'], project_name ))
+			end
+		end
+
+		no_tasks do
+			alias_method :k, :kill
+		end
+
 		desc "database [option] [project_name]", "Maintain your databases by passing a project name"
 
 		method_option :backup, :aliases => "-b", :type => :boolean, :desc => "Backup database"

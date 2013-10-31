@@ -11,6 +11,7 @@ module Obi
             @config_settings = Obi::Configuration.settings
             @project_name = project_name
 			@timestamp = Time.new.strftime("%F-%H-%M-%S")
+            Obi::Configuration.config_settings_check
 			@project_config_settings = YAML.load_file(File.join(@config_settings['local_project_directory'], @project_name, '.obi', 'config')) unless defined? @project_config_settings
         end
 
@@ -72,14 +73,14 @@ module Obi
 
 			# escape the create_credentials password
 			create_credentials[:pass] = escape_special_characters(create_credentials[:pass])
-			`mysql -u"#{create_credentials[:user]}" -h"#{create_credentials[:host]}" -p#{create_credentials[:pass]} -Bse "CREATE DATABASE #{create_credentials[:name]}"`
+			`mysql -u"#{create_credentials[:user]}" -h"#{create_credentials[:host]}" -p#{create_credentials[:pass]} -Bse "CREATE DATABASE IF NOT EXISTS #{create_credentials[:name]}"`
 		end
 
 		def drop(drop_credentials)
 
 			# escape the drop_credentials password
 			drop_credentials[:pass] = escape_special_characters(drop_credentials[:pass])
-			`mysql -u"#{drop_credentials[:user]}" -h"#{drop_credentials[:host]}" -p#{drop_credentials[:pass]} -Bse "DROP DATABASE #{drop_credentials[:name]}"`
+			`mysql -u"#{drop_credentials[:user]}" -h"#{drop_credentials[:host]}" -p#{drop_credentials[:pass]} -Bse "DROP DATABASE IF EXISTS #{drop_credentials[:name]}"`
 		end
 
 		def update_urls( origin_credentials, destination_credentials, import_file )
