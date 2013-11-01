@@ -50,7 +50,6 @@ module Obi
         def initialize(project_name)
             @config_settings = Obi::Configuration.settings
             @project_name = project_name
-            Obi::Configuration.config_settings_check
             @project_path = File.join( @config_settings['local_project_directory'], @project_name )
 
         end

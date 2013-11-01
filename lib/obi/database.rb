@@ -1,18 +1,19 @@
-# require 'time'
+require 'obi/obi_module'
 
 module Obi
 	class Database
 
 		include FindAndReplace
+		include ProjectExist
 
 		attr_accessor :project_config_settings, :sql_path, :timestamp, :local_config_settings
 
 		def initialize(project_name)
-            @config_settings = Obi::Configuration.settings
+            @config_settings = Configuration.settings
             @project_name = project_name
 			@timestamp = Time.new.strftime("%F-%H-%M-%S")
-            Obi::Configuration.config_settings_check
-			@project_config_settings = YAML.load_file(File.join(@config_settings['local_project_directory'], @project_name, '.obi', 'config')) unless defined? @project_config_settings
+			project?( File.join(@config_settings['local_project_directory'], @project_name ) )
+			@project_config_settings = YAML.load_file( File.join( @config_settings['local_project_directory'], @project_name, '.obi', 'config' ) ) unless defined? @project_config_settings
         end
 
 		def dump( origin_credentials )

@@ -24,6 +24,8 @@ module Obi
 		method_option :wordpress, :aliases => "-w", :type => :boolean, :desc => "Create a project with Wordpress installed"
 
 		def new(project_name)
+
+            Obi::Configuration.settings
 			project = Obi::Project.new(project_name)
 			if options.one?
 				if options[:empty]
@@ -46,20 +48,16 @@ module Obi
 
 		desc "destroy [option] [project_name]", "Remove a projects by passing a project name"
 
-		# method_option :empty, :aliases => "-e", :type => :boolean, :desc => "Create an empty project"
-		# method_option :git, :aliases => "-g", :type => :boolean, :desc => "Create a Git enabled project"
-		# method_option :wordpress, :aliases => "-w", :type => :boolean, :desc => "Create a project with Wordpress installed"
-
 		def kill(project_name)
 
-			database = Obi::Database.new(project_name)
-			credentials = Obi::Environment.new
+			database = Database.new(project_name)
+			credentials = Environment.new
 
 			database.dump( credentials.environment_settings( project_name, "local" ) )
 			database.drop( credentials.environment_settings( project_name, "local" ) )
 
-		 	directory = File.join( Obi::Configuration.settings['local_project_directory'], project_name + '/' )
-		 	zipfile_name = File.join( Obi::Configuration.settings['local_project_directory'], project_name + '.zip' )
+		 	directory = File.join( Configuration.settings['local_project_directory'], project_name + '/' )
+		 	zipfile_name = File.join( Configuration.settings['local_project_directory'], project_name + '.zip' )
 
 		 	if File.exist? zipfile_name
 
@@ -75,7 +73,7 @@ module Obi
 				      zipfile.add(file.sub(directory, ''), file)
 				    end
 				end
-				FileUtils.remove_dir( File.join( Obi::Configuration.settings['local_project_directory'], project_name ))
+				FileUtils.remove_dir( File.join( Configuration.settings['local_project_directory'], project_name ))
 			end
 		end
 

@@ -27,3 +27,19 @@ module Obi
 		end
 	end
 end
+
+# see if project exist
+module Obi
+	module ProjectExist
+		def project?(project)
+			if !File.directory?( project )
+				puts ""
+				puts "obi: The project [ #{project} ] doesn't exist"
+				puts ""
+				exit
+			end
+		end
+	end
+end
+
+
