@@ -100,8 +100,7 @@ module Obi
 
 		def fix_sql_serialization( file )
 
-			this = fix_serialization( file )
-			return this
+			return fix_serialization( file )
 
 		end
 
