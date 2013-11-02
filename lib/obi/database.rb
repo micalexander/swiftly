@@ -4,6 +4,7 @@ module Obi
 	class Database
 
 		include FindAndReplace
+		include FixSerialization
 		include ProjectExist
 
 		attr_accessor :project_config_settings, :sql_path, :timestamp, :local_config_settings
@@ -65,9 +66,10 @@ module Obi
 
 			# check to see if a file was provided, if not set pass the last modified file in the destination_credentials environment directory to be imported
 			if import_file == nil
-				import_file = get_last_modified(File.join( @config_settings['local_project_directory'], @project_name, "_resources", "dumps", destination_credentials[:environment], get_last_modified( import_file )))
+				import_file = get_last_modified(File.join( @config_settings['local_project_directory'], @project_name, "_resources", "dumps", origin_credentials[:environment]))
 			end
-			import( destination_credentials, update_urls( origin_credentials, destination_credentials, import_file ))
+
+			import( destination_credentials, fix_sql_serialization( update_urls( origin_credentials, destination_credentials, import_file ) ) )
 		end
 
 		def create(create_credentials)
@@ -96,7 +98,10 @@ module Obi
 			return find_and_replace(input: temp_file, pattern: origin_credentials[:site], output: "#{destination_credentials[:site]}", file: true )
 		end
 
-		def fix_serialization
+		def fix_sql_serialization( file )
+
+			this = fix_serialization( file )
+			return this
 
 		end
 
@@ -124,7 +129,7 @@ module Obi
 			for i in ['*', '?', '[', '<', '>', '&', ';', '!', '|', '$', '(', ')']
 
 				# check to see if the variable pass contains a special character
-				if pass.include? i
+				if pass =~ /i/
 
 					# escape each character found in the variable pass
 					pass.gsub!(Regexp.new(Regexp.escape(i))) { "\\#{i}" }

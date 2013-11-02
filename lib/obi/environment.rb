@@ -33,10 +33,10 @@ module Obi
 				case @environment
 				when "production"
 					file =	File.read( File.join( Obi::Project.new(@project_name).project_path,
-							"wp-config.php"))[/\}\s*else\s*{(\s*\/[\s|\S]*?|\s*)define\(\s*'DB_NAME[\s|\S]*?}/]
+							"wp-config.php"))[/\}\s*else\s*{(\s*\/[\s|\S]*?|\s*)define\(\s*'DB_NAME[\s|\S]*?}[\s\n\/]/]
 				else
 					file =	File.read( File.join( Obi::Project.new(@project_name).project_path,
-							"wp-config.php"))[/\(\s*WP_ENV\s*==\s*'\s*#{@environment}\s*'\s*\).*{[\s|\S]*?}/]
+							"wp-config.php"))[/\(\s*WP_ENV\s*==\s*'\s*#{@environment}\s*'\s*\).*{[\s|\S]*?}[\s|\S]*?else/]
 				end
 				file.each_line do |line|
 					key = line[/('|")(.*?)('|")(.*?)('|")(.*?)('|")/,2]
