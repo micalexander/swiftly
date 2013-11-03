@@ -129,7 +129,6 @@ module Obi
 				end
 			end
 
-			# return pass
 			return pass
 		end
 	end
