@@ -125,7 +125,7 @@ module Obi
 				if pass.include? character
 
 					# escape each character found in the variable pass
-					pass.gsub!(Regexp.new(Regexp.escape(i))) { "\\#{i}" }
+					pass.gsub!(Regexp.new(Regexp.escape(character))) { "\\#{character}" }
 				end
 			end
 
