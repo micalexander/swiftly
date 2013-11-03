@@ -1,8 +1,0 @@
-#!/usr/bin/env ruby
-
-APP_ROOT = File.dirname(__FILE__)
-$:.unshift( APP_ROOT )
-
-require 'obi/CLI'
-
-Obi::CLI.start

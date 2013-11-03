@@ -11,7 +11,7 @@ module Obi
 		include Obi::GetCurrentDirectoryBasename
 
 		# Handles the creation of the .obiconfig file
-		desc "config", "Maintain configuration variables"
+		desc "config", "Configure obi. (mandatory for first time and future use)"
 		def config
 			Configuration.check
 			Menu.new.launch!

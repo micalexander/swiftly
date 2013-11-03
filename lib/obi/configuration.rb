@@ -13,15 +13,19 @@ module Obi
 		end
 
 		# get config settings from config file
-		def self.settings
-			self.check
-		    if !File.directory?(@@config_settings['local_project_directory'].to_s)
-                abort "\nobi: Please run obi config and set your project working directory and any other necessary settings.\n\n"
-            elsif @@config_settings['local_host'] == 0 or @@config_settings['local_user'] == 0 or @@config_settings['local_password'] == 0 or @@config_settings['local_settings'] == 0
-                abort "\nobi: Please run obi config and verify that all of your local environment settings are set.\n\n"
-            else
-            	@@config_settings
-            end
+		def self.settings(menu = nil)
+			unless menu
+				self.check
+			    if !File.directory?(@@config_settings['local_project_directory'].to_s)
+	                abort "\nobi: Please run obi config and set your project working directory and any other necessary settings.\n\n"
+	            elsif @@config_settings['local_host'] == 0 or @@config_settings['local_user'] == 0 or @@config_settings['local_password'] == 0 or @@config_settings['local_settings'] == 0
+	                abort "\nobi: Please run obi config and verify that all of your local environment settings are set.\n\n"
+	            else
+	            	@@config_settings
+	            end
+	        else
+	        	@@config_settings
+	        end
 		end
 
 		# set config settings from config file

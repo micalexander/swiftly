@@ -2,13 +2,15 @@ $:.unshift File.expand_path("../lib", __FILE__)
 require "obi/version"
 
 Gem::Specification.new do |s|
-    s.name        = 'obi'
-    s.version     = Obi::VERSION
-    s.summary     = "Obi is a all-in-one WordPress development tool"
-    s.description = "Obi is a all-in-one tool designed to make project management, WordPress development, MySQL database backups and syncing MySQL databases between multi-environments a breeze."
-    s.authors     = ["Mic Alexander"]
-    s.email       = 'mic@micalexander.com'
-    s.files       = Dir['lib/   *.rb']
+    s.name         = 'obi'
+    s.version      = Obi::VERSION
+    s.platform      = Gem::Platform::RUBY
+    s.summary      = "Obi is a all-in-one WordPress development tool"
+    s.description  = "Obi is a all-in-one tool designed to make project management, WordPress development, MySQL database backups and syncing MySQL databases between multi-environments a breeze."
+    s.authors      = ["Mic Alexander"]
+    s.email        = 'mic@micalexander.com'
+    s.files        = Dir['lib/   *.rb']
+    s.executables  = ["obi3"]
 
     s.required_rubygems_version = ">= 2.1.3"
     s.add_dependency "git", "~> 1.2.6"

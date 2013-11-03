@@ -16,7 +16,7 @@ module Obi
 
 		# get settings
 		def initialize
-			@config_settings = Obi::Configuration.settings
+			@config_settings = Obi::Configuration.settings true
 		end
 
 
@@ -74,7 +74,7 @@ module Obi
 					end
 				end
 				Obi::Configuration.settings = Obi::Configuration.global_file
-				@config_settings = Obi::Configuration.settings
+				@config_settings = Obi::Configuration.settings true
 
 				launch!("#{confirmation} #{@config_settings[setting_variable]}")
 			end
