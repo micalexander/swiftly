@@ -69,7 +69,7 @@ module Obi
 				import_file = get_last_modified(File.join( @config_settings['local_project_directory'], @project_name, "_resources", "dumps", origin_credentials[:environment]))
 			end
 
-			import( destination_credentials, fix_sql_serialization( update_urls( origin_credentials, destination_credentials, import_file ) ) )
+			import( destination_credentials, fix_serialization( update_urls( origin_credentials, destination_credentials, import_file ) ) )
 		end
 
 		def create(create_credentials)
@@ -98,12 +98,6 @@ module Obi
 			return find_and_replace(input: temp_file, pattern: origin_credentials[:site], output: "#{destination_credentials[:site]}", file: true )
 		end
 
-		def fix_sql_serialization( file )
-
-			return fix_serialization( file )
-
-		end
-
 		def get_last_modified(dir)
 
 			# make sure the files to be checked are in the provided directory
@@ -125,10 +119,10 @@ module Obi
 		def escape_special_characters(pass)
 
 			# provide an array of special characters
-			for i in ['*', '?', '[', '<', '>', '&', ';', '!', '|', '$', '(', ')']
+			for character in ['*', '?', '[', '<', '>', '&', ';', '!', '|', '$', '(', ')']
 
 				# check to see if the variable pass contains a special character
-				if pass =~ /i/
+				if pass.include? character
 
 					# escape each character found in the variable pass
 					pass.gsub!(Regexp.new(Regexp.escape(i))) { "\\#{i}" }

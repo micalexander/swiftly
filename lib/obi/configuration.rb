@@ -1,12 +1,10 @@
 require 'obi/global_config'
-require 'obi/version'
 require 'yaml'
 require 'obi/obi_module'
 
 module Obi
 	class Configuration
 
-		include Version
 		include FindAndReplace
 
 		# get config file
@@ -63,17 +61,14 @@ module Obi
 
 		# toggle server settings
 		def server_toggle(setting)
-			# possible_settings = ['enabled', 'wp-enabled', 'disabled']
-			# if possible_settings.include?(setting)
-				case setting
-				when 'enabled'
-					return 'wp-enabled'
-				when 'wp-enabled'
-					return 'disabled'
-				else
-					return 'enabled'
-				end
-			# end
+			case setting
+			when 'enabled'
+				return 'wp-enabled'
+			when 'wp-enabled'
+				return 'disabled'
+			else
+				return 'enabled'
+			end
 		end
 	end
 end

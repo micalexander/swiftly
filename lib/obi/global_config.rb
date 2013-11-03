@@ -4,7 +4,6 @@ require "thor/group"
 module Obi
 	class GlobalConfig < Thor::Group
 
-		include Obi::Version
 		include Thor::Actions
 
 		desc "Handles the creation of the config file."
