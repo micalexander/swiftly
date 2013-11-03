@@ -36,10 +36,10 @@ module Obi
 
 		# check to see if global config file has been created
 		def self.check
-			unless File.exist?(File.absolute_path(".obiconfig"))
+			unless File.exist?(File.absolute_path( File.join(Dir.home, ".obi3config" )))
 				self.create
 			end
-			@@global_config = File.absolute_path(".obiconfig") unless defined? @@global_config
+			@@global_config = File.absolute_path( File.join(Dir.home, ".obi3config" )) unless defined? @@global_config
 			@@config_settings = YAML.load_file(@@global_config) unless defined? @@config_settings
 		end
 
