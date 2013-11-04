@@ -20,6 +20,8 @@ module Obi
 
 				if head =~ /version/
 					"#{head}#{body}: #{VERSION}\n\n"
+				elsif body =~ /project/
+					"#{head}_project_directory: #{tail}\n"
 				else
 					"#{head}_#{body}: #{tail}\n"
 
