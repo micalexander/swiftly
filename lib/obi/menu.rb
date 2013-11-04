@@ -21,11 +21,8 @@ module Obi
 
 
 		# launch the interactive config menu
-		def launch!(message=nil)
-			unless message
-				message = "Your project working directory is currently set to: #{@config_settings['local_project_directory']}"
-			end
-			@msg = message
+		def launch!
+			@msg = "Your project working directory is currently set to:#{@config_settings['local_project_directory']}"
 			menu_output
 			result = nil
 			until result == :quit
@@ -52,31 +49,33 @@ module Obi
 		def do_action(action, args=[])
 
 			def carry_out_action(instruction=nil, setting_variable, confirmation)
-				@msg = "#{instruction}" unless setting_variable =~ /(local_settings|staging_settings|production_settings)/
-				self.menu_output
+				@setting_variable = setting_variable
 				configuration = Obi::Configuration.new
-				if setting_variable =~ /(local_settings|staging_settings|production_settings)/
-					configuration.update_config_setting(setting_variable)
+				if @setting_variable =~ /(local_settings|staging_settings|production_settings)/
+					configuration.update_config_setting(@setting_variable)
 				else
+					@msg = "#{instruction}" unless @setting_variable =~ /(local_settings|staging_settings|production_settings)/
+					self.menu_output
 					print "> "
-					user_response = $stdin.gets.chomp.rstrip.gsub(/\\/, "" )
-					if setting_variable =~ /local_project_directory/
-						puts setting_variable
+					user_response = $stdin.gets.chomp.rstrip.gsub( /\\/, "" )
+					if @setting_variable =~ /local_project_directory/
+
 						if !File.directory?(user_response)
-							confirmation = "Your input was was not a directory so there has been no change:"
+							@confirmation = "Your input was was not a directory so there has been no change:"
 						else
-							configuration.update_config_setting(setting_variable, user_response)
+							configuration.update_config_setting(@setting_variable, user_response)
 						end
+
 					elsif user_response.nil? or user_response == 0 or user_response.empty?
-						confirmation = "Your input was empty therefore there has been no change:"
+						@confirmation = "Your input was empty therefore there has been no change:"
 					else
-						configuration.update_config_setting(setting_variable, user_response)
+						configuration.update_config_setting(@setting_variable, user_response)
 					end
 				end
 				Obi::Configuration.settings = Obi::Configuration.global_file
 				@config_settings = Obi::Configuration.settings true
-
-				launch!("#{confirmation} #{@config_settings[setting_variable]}")
+				@msg = "#{confirmation} #{@config_settings[@setting_variable]}"
+				self.menu_output
 			end
 
 			# based on users chosen action carry out the action
