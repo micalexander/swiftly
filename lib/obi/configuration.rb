@@ -9,7 +9,7 @@ module Obi
 
 		# get config file
 		def self.global_file
-			@@global_config
+			@@global_config = File.absolute_path( File.join(Dir.home, ".obi3config" ))
 		end
 
 		# get config settings from config file
@@ -36,11 +36,18 @@ module Obi
 
 		# check to see if global config file has been created
 		def self.check
-			unless File.exist?(File.absolute_path( File.join(Dir.home, ".obi3config" )))
+
+			unless File.exist? self.global_file
 				self.create
 			end
-			@@global_config = File.absolute_path( File.join(Dir.home, ".obi3config" )) unless defined? @@global_config
+			@@global_config = self.global_file unless defined? @@global_config
 			@@config_settings = YAML.load_file(@@global_config) unless defined? @@config_settings
+			if @@config_settings =~ /version='2.0'/
+				puts
+				puts "obi: I'm sorry, I'm out of date. To upgrade, please run [ obi upgrade ]. All settings will be preserved"
+				puts
+				exit
+			end
 		end
 
 		# create config file

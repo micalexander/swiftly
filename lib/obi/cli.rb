@@ -2,6 +2,7 @@ require 'Thor'
 require 'obi/configuration'
 require 'obi/Menu'
 require 'obi/Project'
+require 'obi/obify'
 require 'obi/obi_module'
 
 
@@ -15,6 +16,21 @@ module Obi
 		def config
 			Configuration.check
 			Menu.new.launch!
+		end
+
+		desc "upgrade", "Upgrade obi to the current version"
+		def upgrade
+			global_config = File.absolute_path( File.join(Dir.home, ".obi3config" ))
+			if File.exists? global_config
+				Obify.global_config global_config
+				say
+				say "obi: updated."
+				say
+			else
+				say
+				say "obi: There is nothing to upgrade please run [ obi config ] to get started"
+				say
+			end
 		end
 
 		desc "new [option] [project_name]", "Create a new projects by passing a project name"

@@ -14,7 +14,7 @@ module Obi
 
 		def create
 			@version = VERSION
-			template "templates/global_config.erb", File.join(Dir.home, ".obi3config")
+			template "templates/global_config.erb", Configuration.global_file
 		end
 	end
 end
