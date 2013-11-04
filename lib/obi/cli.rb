@@ -10,6 +10,7 @@ module Obi
 	class CLI < Thor
 		include Thor::Actions
 		include Obi::GetCurrentDirectoryBasename
+		include Obi::ProjectExist
 
 		# Handles the creation of the .obiconfig file
 		desc "config", "Configure obi. (mandatory for first time and future use)"
@@ -19,17 +20,38 @@ module Obi
 		end
 
 		desc "upgrade", "Upgrade obi to the current version"
-		def upgrade
-			global_config = File.absolute_path( File.join(Dir.home, ".obi3config" ))
-			if File.exists? global_config
-				Obify.global_config global_config
-				say
-				say "obi: updated."
-				say
+
+		method_option :project, :aliases => "-p", :type => :boolean, :desc => "Upgrade project config"
+
+		def upgrade( project_name = nil )
+
+			if options[:project]
+				if project_name
+					project_config = File.join( Configuration.settings['local_project_directory'], project_name, '.obi', 'config' )
+					project? File.join( Configuration.settings['local_project_directory'], project_name )
+					Obify.project_config project_config
+					say
+					say "obi: updated."
+					say
+				else
+					say
+					say "obi: Please provide a project name to upgrade"
+					say
+					exit
+				end
 			else
-				say
-				say "obi: There is nothing to upgrade please run [ obi config ] to get started"
-				say
+				global_config = File.absolute_path( File.join(Dir.home, ".obi3config" ))
+				if File.exists? global_config
+					Obify.global_config global_config
+					say
+					say "obi: updated."
+					say
+				else
+					say
+					say "obi: There is nothing to upgrade please run [ obi config ] to get started"
+					say
+					exit
+				end
 			end
 		end
 

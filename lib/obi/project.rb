@@ -73,7 +73,7 @@ module Obi
         end
 
         def enable_git
-            File.open(File.join( @project_path, ".gitignore"), "w") { |file| file.puts "_resources/\n.obi\n.obiignore" }
+            File.open(File.join( @project_path, ".gitignore"), "w") { |file| file.puts ".DS_Store\n.sass-cache/\n_resources/\n.obi/\n.obiignore\nbower_components/" }
             git = Git.init( @project_path )
             git.add
             git.commit_all('initial commit')
