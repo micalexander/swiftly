@@ -22,36 +22,89 @@ module Obi
 		desc "upgrade", "Upgrade obi to the current version"
 
 		method_option :project, :aliases => "-p", :type => :boolean, :desc => "Upgrade project config"
+		method_option :global, :aliases => "-g", :type => :boolean, :desc => "Upgrade global config"
+		method_option :all, :aliases => "-a", :type => :boolean, :desc => "Upgrade both global and project configs"
 
 		def upgrade( project_name = nil )
 
-			if options[:project]
+			if options[:project] and !options[:all] and !options[:global]
 				if project_name
 					project_config = File.join( Configuration.settings['local_project_directory'], project_name, '.obi', 'config' )
-					project? File.join( Configuration.settings['local_project_directory'], project_name )
-					Obify.project_config project_config
-					say
-					say "obi: updated."
-					say
+					if YAML.load_file( project_config )['enable_production_ssh'] != 'enable_production_ssh'
+						say
+						say  "obi: #{project_name} is already up to date."
+						say
+					else
+						project? File.join( Configuration.settings['local_project_directory'], project_name )
+						Obify.project_config project_config
+						say
+						say  "obi: #{project_name} has been successfully updated."
+						say
+					end
 				else
 					say
 					say "obi: Please provide a project name to upgrade"
 					say
 					exit
 				end
-			else
-				global_config = File.absolute_path( File.join(Dir.home, ".obi3config" ))
+			elsif options[:all] and !options[:project] and !options[:global]
+				projects = Dir.glob(File.join( Configuration.settings['local_project_directory'],'*' )).select {|f| File.directory? f}
+				projects.each do |project|
+					project_config = File.join( project, '.obi', 'config' )
+					if YAML.load_file( project_config )['enable_production_ssh'] != 'enable_production_ssh'
+						say
+						say  "obi: #{project_name} is already up to date."
+						say
+					else
+						project? File.join( project )
+						Obify.project_config project_config
+						say
+						say "obi: #{project} has been successfully updated."
+					end
+				end
+				global_config = Configuration.global_file
 				if File.exists? global_config
-					Obify.global_config global_config
-					say
-					say "obi: updated."
-					say
+					if Configuration.settings['version'] != 'version'
+						say
+						say "obi: You already have the latest version"
+						say
+					else
+						Obify.global_config global_config
+						say
+						say "obi: obi has been successfully updated."
+						say
+					end
 				else
 					say
 					say "obi: There is nothing to upgrade please run [ obi config ] to get started"
 					say
 					exit
 				end
+			elsif options[:global] and !options[:all] and !options[:project]
+				global_config = Configuration.global_file
+				if File.exists? global_config
+					if Configuration.settings['version'] != 'version'
+						say
+						say "obi: You already have the latest version"
+						say
+					else
+						Obify.global_config global_config
+						say
+						say "obi: obi has been successfully updated."
+						say
+					end
+				else
+					say
+					say "obi: Couldn't find a global config file, run [ obi config ] to get started"
+					say
+					exit
+				end
+			else
+				say
+				say "obi: Not sure what you are trying to do";
+				say
+				say `bin/obi3 -h upgrade`
+				say
 			end
 		end
 
@@ -213,7 +266,7 @@ module Obi
 				say
 				say "obi: Not sure what you are trying to do";
 				say
-				say `lib/obi3 -h database`
+				say `bin/obi3 -h database`
 				say
 			end
 		end
