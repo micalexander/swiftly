@@ -13,9 +13,9 @@ module Obi
 		end
 
 		# get config settings from config file
-		def self.settings(menu = nil)
-			unless menu
-				self.check
+		def self.settings(pass_thru = nil)
+			self.check
+			unless pass_thru
 			    if !File.directory?(@@config_settings['local_project_directory'].to_s)
 	                abort "\nobi: Please run obi config and set your project working directory and any other necessary settings.\n\n"
 	            elsif @@config_settings['local_host'] == 0 or @@config_settings['local_user'] == 0 or @@config_settings['local_password'] == 0 or @@config_settings['local_settings'] == 0
@@ -42,12 +42,6 @@ module Obi
 			end
 			@@global_config = self.global_file unless defined? @@global_config
 			@@config_settings = YAML.load_file(@@global_config) unless defined? @@config_settings
-			if @@config_settings =~ /version='2.0'/
-				puts
-				puts "obi: I'm sorry, I'm out of date. To upgrade, please run [ obi upgrade ]. All settings will be preserved"
-				puts
-				exit
-			end
 		end
 
 		# create config file
