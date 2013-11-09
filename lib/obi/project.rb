@@ -136,9 +136,10 @@ module Obi
             FileUtils.rm(File.join(@project_path, "wp-content", "themes", "master.zip"))
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "mask-master"), File.join(@project_path, "wp-content", "themes", "#{@project_name}"))
 
-            # move the wp-config, .htaccess, Guardfile, Gemfile, and Gemfile.lock files to the site root
+            # move the wp-config, .htaccess, bower.json, Guardfile, Gemfile, and Gemfile.lock files to the site root
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", ".htaccess"), @project_path )
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "wp-config.php"), @project_path )
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "bower.json"), @project_path )
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Guardfile"), @project_path )
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile"), @project_path )
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile.lock"), @project_path )
