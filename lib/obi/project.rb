@@ -151,8 +151,14 @@ module Obi
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "mask-specific-plugin"), File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin"))
             FileUtils.mv(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin",  "mask-plugin.php"), File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"))
 
+            # grab global plugins if they exist
+            Dir.glob( File.join(@config_settings['local_project_directory'], 'plugins', "**")).each do |dir|
+                FileUtils.cp_r dir, File.join( @project_path, 'wp-content', 'plugins') unless !File.exist?( File.join(@config_settings['local_project_directory'], 'plugins') )
+            end
+
             # find and replace the mask name with the project name
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-mask.png"), File.join(@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-#{@project_name}.png"))
+
 
             # find and replace the mask name with the project name
             # - text to find and replace
@@ -160,7 +166,7 @@ module Obi
                 "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/mask/, "#{@project_name}".capitalize)
             function_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php")).gsub(/mask/, "#{@project_name}")
             guard_replace = File.read(File.join(@project_path, "Guardfile")).gsub(/mask/, "#{@project_name}")
-            ie_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss")).gsub(/mask/, "#{@project_name}")
+            ie_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss")).gsub(/themes\/mask/, "themes/#{@project_name}")
             # - open file and perform find and replace
             File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
                 file.puts plugin_replace }
@@ -210,6 +216,7 @@ module Obi
             database.create(credentials)
             # enable git repository
             enable_git
+            `cd "#{@project_path}" bundle; bower update; guard; sass sprockets`
 
         end
     end

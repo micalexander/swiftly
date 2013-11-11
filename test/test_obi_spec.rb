@@ -1,18 +1,18 @@
 require "minitest/autorun"
 require_relative "../lib/obi/configuration"
 
-describe ObiConfiguration do
+module Obi
+	describe Obi::Configuration do
 
-	before do
-		@obi = Obi::Configuration
-	end
+		before do
+			@obi = Obi::Configuration
+		end
 
-	discribe "when config file created" do
-		it "must create config" do
-			# @obi.global_config.wont_be :empty?
+		describe "when config file created" do
+			it "must create config" do
+				@obi.create
+			end
 		end
 	end
-
 end
-
 

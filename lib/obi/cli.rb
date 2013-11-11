@@ -50,6 +50,14 @@ module Obi
 			end
 		end
 
+		desc "plugins", "Create global plugin directory in working project directory"
+		def plugins
+			Upgrade.check
+            Configuration.settings
+           	Dir.mkdir(File.join( Configuration.settings['local_project_directory'], 'plugins')) unless File.exists?(File.join( Configuration.settings['local_project_directory'], 'plugins'))
+		end
+
+
 		desc "new [option] [project_name]", "Create a new projects by passing a project name"
 
 		method_option :empty, :aliases => "-e", :type => :boolean, :desc => "Create an empty project"
