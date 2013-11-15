@@ -73,7 +73,7 @@ module Obi
 					puts  "obi: #{project_name} is already up to date."
 					puts
 				else
-					project? File.join( @@settings['local_project_directory'], project_name )
+					# project? File.join( @@settings['local_project_directory'], project_name )
 
 					pattern = /((^[a-zA-Z\d_]*?)(='|=\()(('.*?|.*?)('\n|'\))))|((\#(\s|\S)(.*?)\n\#))/
 
@@ -91,6 +91,9 @@ module Obi
 								direc << "\n- #{b[/'(.*?)'/,1]}"
 							end
 							"#{head}: #{direc}"
+						elsif head =~ /sshmysql/
+							new_head = head.gsub(/sshmysql/, 'ssh_sql')
+							"#{new_head}: #{tail}\n"
 						elsif foot =~ /#/
 							"#{foot}\n"
 						else
