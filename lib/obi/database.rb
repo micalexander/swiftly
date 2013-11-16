@@ -1,4 +1,5 @@
 require 'obi/obi_module'
+require 'open3'
 
 module Obi
 	class Database
@@ -20,7 +21,7 @@ module Obi
 		def dump( origin_credentials )
 
 			# escape the origin_credentials password
-			origin_credentials[:pass] = escape_special_characters(origin_credentials[:pass])
+			# origin_credentials[:pass] = escape_special_characters(origin_credentials[:pass])
 
 			# provide the create dump site for the database dump
 			dump_path = File.join( @config_settings['local_project_directory'], @project_name, "_resources", "dumps", origin_credentials[:environment] )
@@ -31,18 +32,26 @@ module Obi
 
 			# check if the origin_credentials environment provided was local and the ssh_status is set in order to dump using ssh or not
 			if origin_credentials[:environment] != "local" and ssh_status != 0
-				`ssh -C #{ssh_user} mysqldump --single-transaction --opt --net_buffer_length=75000 --verbose \
-				-u"#{origin_credentials[:user]}" -p"#{origin_credentials[:pass]}" "#{origin_credentials[:name]}" >  "#{dump_path}/#{@timestamp}-#{origin_credentials[:environment]}.sql"`
+				dump_cmd = "ssh -C #{ssh_user} mysqldump --single-transaction --opt --net_buffer_length=75000 --verbose \
+					-u\'#{origin_credentials[:user]}\' -h\'#{origin_credentials[:host]}\' -p\'#{origin_credentials[:pass]}\'\
+					\'#{origin_credentials[:name]}\' >  \"#{dump_path}/#{@timestamp}-#{origin_credentials[:environment]}.sql\""
 			else
-				`mysqldump --verbose -u"#{origin_credentials[:user]}" -h"#{origin_credentials[:host]}" -p#{origin_credentials[:pass]} \
-				"#{origin_credentials[:name]}" >  "#{dump_path}/#{@timestamp}-#{origin_credentials[:environment]}.sql"`
+				dump_cmd = "mysqldump --single-transaction --opt --net_buffer_length=75000 --verbose\
+					-u\'#{origin_credentials[:user]}\' -h\'#{origin_credentials[:host]}\' -p\'#{origin_credentials[:pass]}\'\
+					\'#{origin_credentials[:name]}\' >  \"#{dump_path}/#{@timestamp}-#{origin_credentials[:environment]}.sql\""
+			end
+			Open3.popen2e(dump_cmd) do |stdin, stdout_err, wait_thr|
+				exit_status = wait_thr.value
+				while line = stdout_err.gets
+					puts "obi: #{line}"
+				end
+				unless exit_status.success?
+						abort "obi: command failed - #{dump_cmd}"
+				end
 			end
 		end
 
 		def import(destination_credentials, import_file)
-
-			# escape the destination_credentials password
-			destination_credentials[:pass] = escape_special_characters(destination_credentials[:pass])
 
 			# get the ssh_status and ssh_user(ssh alias) from the project specific config
 			ssh_status = @project_config_settings["enable_#{destination_credentials[:environment]}_ssh_sql"]
@@ -50,9 +59,21 @@ module Obi
 
 			# check if the destination_credentials environment provided was local and the ssh_status is set in order to dump using ssh or not
 			if destination_credentials[:environment] != "local" and ssh_status != 0
-				`ssh -C #{ssh_user} mysql -u"#{destination_credentials[:user]}" -p"#{destination_credentials[:pass]}" "#{destination_credentials[:name]}" < "#{import_file}"`
+				import_cmd = "ssh -C #{ssh_user} mysql -u\'#{destination_credentials[:user]}\' -h\'#{destination_credentials[:host]}\'\
+					-p\'#{destination_credentials[:pass]}\' \'#{destination_credentials[:name]}\' < \"#{import_file}\""
 			else
-				`mysql -u"#{destination_credentials[:user]}" -h"#{destination_credentials[:host]}" -p#{destination_credentials[:pass]} "#{destination_credentials[:name]}" < "#{import_file}"`
+				import_cmd = "mysql -u\'#{destination_credentials[:user]}\' -h\'#{destination_credentials[:host]}\'\
+					-p\'#{destination_credentials[:pass]}\' \'#{destination_credentials[:name]}\' < \"#{import_file}\""
+			end
+
+			Open3.popen2e(import_cmd) do |stdin, stdout_err, wait_thr|
+				exit_status = wait_thr.value
+				while line = stdout_err.gets
+					puts "obi: #{line}"
+				end
+				unless exit_status.success?
+						abort "obi: command failed - #{import_cmd}"
+				end
 			end
 		end
 
@@ -74,16 +95,32 @@ module Obi
 
 		def create(create_credentials)
 
-			# escape the create_credentials password
-			create_credentials[:pass] = escape_special_characters(create_credentials[:pass])
-			`mysql -u"#{create_credentials[:user]}" -h"#{create_credentials[:host]}" -p#{create_credentials[:pass]} -Bse "CREATE DATABASE IF NOT EXISTS #{create_credentials[:name]}"`
+			create_cmd = "mysql -u\'#{create_credentials[:user]}\' -h\'#{create_credentials[:host]}\'\
+				-p\'#{create_credentials[:pass]}\' -Bse\"CREATE DATABASE IF NOT EXISTS #{create_credentials[:name]}\""
+			Open3.popen2e(create_cmd) do |stdin, stdout_err, wait_thr|
+				exit_status = wait_thr.value
+				while line = stdout_err.gets
+					puts "obi: #{line}"
+				end
+				unless exit_status.success?
+					abort "obi: command failed - #{create_cmd}"
+				end
+			end
 		end
 
 		def drop(drop_credentials)
 
-			# escape the drop_credentials password
-			drop_credentials[:pass] = escape_special_characters(drop_credentials[:pass])
-			`mysql -u"#{drop_credentials[:user]}" -h"#{drop_credentials[:host]}" -p#{drop_credentials[:pass]} -Bse "DROP DATABASE IF EXISTS #{drop_credentials[:name]}"`
+			drop_cmd = "mysql -u\'#{drop_credentials[:user]}\' -h\'#{drop_credentials[:host]}\'\
+				-p\'#{drop_credentials[:pass]}\' -Bse\"DROP DATABASE IF EXISTS #{drop_credentials[:name]}\""
+			Open3.popen2e(drop_cmd) do |stdin, stdout_err, wait_thr|
+				exit_status = wait_thr.value
+				while line = stdout_err.gets
+					puts "obi: #{line}"
+				end
+				unless exit_status.success?
+					abort "obi: command failed - #{drop_cmd}"
+				end
+			end
 		end
 
 		def update_urls( origin_credentials, destination_credentials, import_file )
@@ -114,22 +151,6 @@ module Obi
 
 			# return the last modified file
 			return files.first
-		end
-
-		def escape_special_characters(pass)
-
-			# provide an array of special characters
-			for character in ['*', '?', '[', '<', '>', '&', ';', '!', '|', '$', '(', ')']
-
-				# check to see if the variable pass contains a special character
-				if pass.include? character
-
-					# escape each character found in the variable pass
-					pass.gsub!(Regexp.new(Regexp.escape(character))) { "\\#{character}" }
-				end
-			end
-
-			return pass
 		end
 	end
 end
