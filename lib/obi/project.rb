@@ -127,7 +127,6 @@ module Obi
                 # entry is an instance of Zip::ZipEntry
                 zipfile.each do |entry|
                     entry_file_path = File.join(@project_path, "wp-content", "themes", entry.to_s)
-                    # FileUtils.mkdir_p(File.dirname(entry_file_path))
                     zipfile.extract(entry, entry_file_path)
                 end
             end
