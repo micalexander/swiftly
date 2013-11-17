@@ -1,4 +1,5 @@
 require 'obi/project_config'
+require 'obi/plugins'
 require 'net/http'
 require 'fileutils'
 require 'git'
@@ -151,9 +152,13 @@ module Obi
             FileUtils.mv(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin",  "mask-plugin.php"), File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"))
 
             # grab global plugins if they exist
-            Dir.glob( File.join(@config_settings['local_project_directory'], 'plugins', "**")).each do |dir|
-                FileUtils.cp_r dir, File.join( @project_path, 'wp-content', 'plugins') unless !File.exist?( File.join(@config_settings['local_project_directory'], 'plugins') )
+            if Plugins.settings_check
+                Dir.glob( File.join(@config_settings['local_project_directory'], 'plugins', "**")).each do |dir|
+                    FileUtils.cp_r dir, File.join( @project_path, 'wp-content', 'plugins') unless !File.exist?( File.join(@config_settings['local_project_directory'], 'plugins') )
+                end
             end
+            # add plugins to the functions file
+            Plugins.add_plugins_to_functions_file @project_path
 
             # find and replace the mask name with the project name
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-mask.png"), File.join(@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-#{@project_name}.png"))

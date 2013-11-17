@@ -54,7 +54,8 @@ module Obi
 		def plugins
 			Upgrade.check
             Configuration.settings
-           	Dir.mkdir(File.join( Configuration.settings['local_project_directory'], 'plugins')) unless File.exists?(File.join( Configuration.settings['local_project_directory'], 'plugins'))
+           	FileUtils.mkdir_p(File.join( Configuration.settings['local_project_directory'], '.obi','plugins')) unless File.exists?(File.join( Configuration.settings['local_project_directory'], '.obi', 'plugins'))
+           	FileUtils.touch(File.join( Configuration.settings['local_project_directory'], '.obi', 'plugins', '_plugins' )) unless File.exists? File.join( Configuration.settings['local_project_directory'], '.obi', 'plugins', '_plugins' )
 		end
 
 
