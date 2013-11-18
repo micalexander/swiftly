@@ -153,8 +153,8 @@ module Obi
 
             # grab global plugins if they exist
             if Plugins.settings_check
-                Dir.glob( File.join(@config_settings['local_project_directory'], 'plugins', "**")).each do |dir|
-                    FileUtils.cp_r dir, File.join( @project_path, 'wp-content', 'plugins') unless !File.exist?( File.join(@config_settings['local_project_directory'], 'plugins') )
+                Dir.glob( File.join(@config_settings['local_project_directory'], '.obi', 'plugins', "**")).each do |dir|
+                    FileUtils.cp_r dir, File.join( @project_path, 'wp-content',  '.obi', 'plugins') unless !File.exist?( File.join(@config_settings['local_project_directory'], '.obi', 'plugins') )
                 end
             end
             # add plugins to the functions file
