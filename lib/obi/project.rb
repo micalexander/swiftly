@@ -154,7 +154,7 @@ module Obi
             # grab global plugins if they exist
             if Plugins.settings_check
                 Dir.glob( File.join(@config_settings['local_project_directory'], '.obi', 'plugins', "**")).each do |dir|
-                    FileUtils.cp_r dir, File.join( @project_path, 'wp-content',  '.obi', 'plugins') unless !File.exist?( File.join(@config_settings['local_project_directory'], '.obi', 'plugins') )
+                    FileUtils.cp_r dir, File.join( @project_path, 'wp-content', 'plugins') unless !File.exist?( File.join(@config_settings['local_project_directory'], '.obi','plugins') )
                 end
             end
             # add plugins to the functions file
@@ -167,13 +167,25 @@ module Obi
             # find and replace the mask name with the project name
             # - text to find and replace
             plugin_replace = File.read(File.join(@project_path, "wp-content", "plugins",
-                "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/mask/, "#{@project_name}".capitalize)
+                "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/mask/, "#{@project_name}")
+            File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
+                file.puts plugin_replace }
+
+            plugin_second_replace = File.read(File.join(@project_path, "wp-content", "plugins",
+                "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/(Plugin\s+Name:\s+)(#{@project_name})/, "Plugin Name: #{@project_name.capitalize}")
+            File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
+                file.puts plugin_second_replace }
+
+            plugin_third_replace = File.read(File.join(@project_path, "wp-content", "plugins",
+                "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/(Description:\s+Site\s+specific\s+code\s+changes\s+for\s+)(#{@project_name})/, "Description: Site specific code changes for #{@project_name.capitalize}")
+            File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
+                file.puts plugin_third_replace }
+
             function_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php")).gsub(/mask/, "#{@project_name}")
             guard_replace = File.read(File.join(@project_path, "Guardfile")).gsub(/mask/, "#{@project_name}")
             ie_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss")).gsub(/themes\/mask/, "themes/#{@project_name}")
             # - open file and perform find and replace
-            File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
-                file.puts plugin_replace }
+
             File.open(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php"), "w") { |file| file.puts function_replace }
             File.open(File.join(@project_path, "Guardfile"), "w") { |file| file.puts guard_replace }
             File.open(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss"), "w") { |file| file.puts ie_replace }
