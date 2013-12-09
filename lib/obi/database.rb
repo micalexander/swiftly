@@ -7,6 +7,7 @@ module Obi
 		include FindAndReplace
 		include FixSerialization
 		include ProjectExist
+		include LastModifiedDir
 
 		attr_accessor :project_config_settings, :sql_path, :timestamp, :local_config_settings
 
@@ -133,24 +134,6 @@ module Obi
 
 			# return the rewritten file
 			return find_and_replace(input: temp_file, pattern: origin_credentials[:site], output: "#{destination_credentials[:site]}", file: true )
-		end
-
-		def get_last_modified(dir)
-
-			# make sure the files to be checked are in the provided directory
-			files = Dir.new(dir).select { |file| file!= '.' && file!='..' }
-
-			# make sure the file has been written to
-			return nil if (files.size < 1)
-
-			# create an array of all the files
-			files = files.collect { |file| dir+'/'+file }
-
-			# sort array by last modified
-			files = files.sort { |a,b| File.mtime(b)<=>File.mtime(a) }
-
-			# return the last modified file
-			return files.first
 		end
 	end
 end

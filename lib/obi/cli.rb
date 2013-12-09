@@ -58,6 +58,14 @@ module Obi
            	FileUtils.touch(File.join( Configuration.settings['local_project_directory'], '.obi', 'plugins', '_plugins' )) unless File.exists? File.join( Configuration.settings['local_project_directory'], '.obi', 'plugins', '_plugins' )
 		end
 
+		desc "templates", "Create global template directory in working project directory"
+		def templates
+			Upgrade.check
+            Configuration.settings
+           	FileUtils.mkdir_p(File.join( Configuration.settings['local_project_directory'], '.obi','templates')) unless File.exists?(File.join( Configuration.settings['local_project_directory'], '.obi', 'templates'))
+           	FileUtils.touch(File.join( Configuration.settings['local_project_directory'], '.obi', 'templates', '_templates' )) unless File.exists? File.join( Configuration.settings['local_project_directory'], '.obi', 'templates', '_templates' )
+		end
+
 
 		desc "new [option] [project_name]", "Create a new projects by passing a project name"
 
@@ -65,7 +73,7 @@ module Obi
 		method_option :git, :aliases => "-g", :type => :boolean, :desc => "Create a Git enabled project"
 		method_option :wordpress, :aliases => "-w", :type => :boolean, :desc => "Create a project with Wordpress installed"
 
-		def new(project_name)
+		def new(project_name, template = '')
 
 			Upgrade.check
             Obi::Configuration.settings
@@ -76,7 +84,7 @@ module Obi
 				elsif options[:git]
 					project.git
 				elsif options[:wordpress]
-					project.wordpress
+					project.wordpress template
 				end
 			else
 				puts

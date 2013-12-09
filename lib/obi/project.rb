@@ -1,52 +1,21 @@
 require 'obi/project_config'
 require 'obi/plugins'
-require 'net/http'
+require 'obi/templates'
 require 'fileutils'
 require 'git'
 require 'zip'
 require 'obi/environment'
+require 'obi/redirectfollower'
 require 'obi/database'
 require 'obi/obi_module'
 
 module Obi
     class Project
         include Obi::FindAndReplace
+        include LastModifiedDir
 
         attr_accessor :project_path, :project_name
 
-        class RedirectFollower
-            class TooManyRedirects < StandardError; end
-
-            attr_accessor :url, :body, :redirect_limit, :response
-
-            def initialize(url, limit=5)
-                @url, @redirect_limit = url, limit
-            end
-
-            def resolve
-                raise TooManyRedirects if redirect_limit < 0
-
-                self.response = Net::HTTP.get_response(URI.parse(url))
-
-                if response.kind_of?(Net::HTTPRedirection)
-                  self.url = redirect_url
-                  self.redirect_limit -= 1
-
-                  resolve
-                end
-
-                self.body = response.body
-                self
-            end
-
-            def redirect_url
-                if response['location'].nil?
-                    response.body.match(/<a href=\"([^>]+)\">/i)[1]
-                else
-                    response['location']
-                end
-            end
-        end
 
         def initialize(project_name)
             @config_settings = Obi::Configuration.settings
@@ -89,7 +58,10 @@ module Obi
             enable_git
         end
 
-        def wordpress
+        def wordpress template
+
+            # puts Templates.load_template
+
 
             create_directories
 
@@ -115,41 +87,53 @@ module Obi
             FileUtils.mv( Dir[File.join(@project_path, 'wordpress/*')], @project_path )
             FileUtils.rmdir(File.join(@project_path, 'wordpress'))
 
-            # download the mask framwork
-            # get_mask
-            mask = RedirectFollower.new('https://github.com/micalexander/mask/archive/master.zip').resolve
-            File.open(File.join( @project_path, "wp-content", "themes", "master.zip"), "w") do |file|
-                file.write mask.body
+            if template.empty?
+                template_location = Templates.load_template
+                template_name = 'mask'
+            else
+                template_location = Templates.load_template template
+                template_name = template
             end
 
-            # unzip the mask zip file
-            zipfile_name = File.join(@project_path, "wp-content", "themes","master.zip")
-            Zip::File.open(zipfile_name) do |zipfile|
-                # entry is an instance of Zip::ZipEntry
-                zipfile.each do |entry|
-                    entry_file_path = File.join(@project_path, "wp-content", "themes", entry.to_s)
-                    zipfile.extract(entry, entry_file_path)
+            if template_location =~ /^#{URI::regexp}$/
+                # download the framwork
+                # get_#{template_name}
+                downloaded_template = RedirectFollower.new(template_location).resolve
+                File.open(File.join( @project_path, "wp-content", "themes", File.basename(template_location)), "w") do |file|
+                    file.write downloaded_template.body
                 end
+
+                # unzip the template zip file
+                zipfile_name = File.join(@project_path, "wp-content", "themes",File.basename(template_location))
+                Zip::File.open(zipfile_name) do |zipfile|
+                    # entry is an instance of Zip::ZipEntry
+                    zipfile.each do |entry|
+                        entry_file_path = File.join(@project_path, "wp-content", "themes", entry.to_s)
+                        zipfile.extract(entry, entry_file_path)
+                    end
+                end
+
+                # remove folder and zippped file
+                FileUtils.rm(File.join(@project_path, "wp-content", "themes", File.basename(template_location)))
+                FileUtils.mv(get_last_modified(File.join(@project_path, "wp-content", "themes")), File.join(@project_path, "wp-content", "themes", "#{@project_name}"))
+
+            else
+                FileUtils.cp_r(File.join(@config_settings['local_project_directory'], '.obi', 'templates', template), File.join(@project_path, "wp-content", "themes", "#{@project_name}"))
             end
-
-            # remove mask folder and zip file
-            FileUtils.rm(File.join(@project_path, "wp-content", "themes", "master.zip"))
-            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "mask-master"), File.join(@project_path, "wp-content", "themes", "#{@project_name}"))
-
             # move the wp-config, .htaccess, bower.json, Guardfile, Gemfile, and Gemfile.lock files to the site root
-            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", ".htaccess"), @project_path )
-            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "wp-config.php"), @project_path )
-            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "bower.json"), @project_path )
-            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Guardfile"), @project_path )
-            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile"), @project_path )
-            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile.lock"), @project_path )
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", ".htaccess"), @project_path ) unless !File.exists?  File.join(@project_path, "wp-content", "themes", "#{@project_name}", ".htaccess")
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "wp-config.php"), @project_path ) unless !File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "wp-config.php")
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "bower.json"), @project_path ) unless !File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "bower.json")
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Guardfile"), @project_path ) unless !File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Guardfile")
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile"), @project_path ) unless !File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile")
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile.lock"), @project_path ) unless !File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile.lock")
 
             # remove sample wp-config
             FileUtils.rm(File.join(@project_path, "wp-config-sample.php"))
 
             # move site specific plugin to the plugins folder
-            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "mask-specific-plugin"), File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin"))
-            FileUtils.mv(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin",  "mask-plugin.php"), File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"))
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "#{template_name}-specific-plugin"), File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin")) unless !File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "#{template_name}-specific-plugin")
+            FileUtils.mv(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin",  "#{template_name}-plugin.php"), File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")) unless !File.exists? File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin",  "#{template_name}-plugin.php")
 
             # grab global plugins if they exist
             if Plugins.settings_check
@@ -160,30 +144,38 @@ module Obi
             # add plugins to the functions file
             Plugins.add_plugins_to_functions_file @project_path
 
-            # find and replace the mask name with the project name
-            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-mask.png"), File.join(@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-#{@project_name}.png"))
+            # find and replace the #{template_name} name with the project name
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-#{template_name}.png"), File.join(@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-#{@project_name}.png")) unless !File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "img", "wp-login-logo-#{template_name}.png")
 
 
-            # find and replace the mask name with the project name
+            # find and replace the #{template_name} name with the project name
             # - text to find and replace
-            plugin_replace = File.read(File.join(@project_path, "wp-content", "plugins",
-                "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/mask/, "#{@project_name}")
-            File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
-                file.puts plugin_replace }
+                if File.exists? File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin",  "#{@project_name}-plugin.php")
+                plugin_replace = File.read(File.join(@project_path, "wp-content", "plugins",
+                    "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/#{template_name}/, "#{@project_name}")
+                File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
+                    file.puts plugin_replace }
+            end
 
-            plugin_second_replace = File.read(File.join(@project_path, "wp-content", "plugins",
-                "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/(Plugin\s+Name:\s+)(#{@project_name})/, "Plugin Name: #{@project_name.capitalize}")
-            File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
-                file.puts plugin_second_replace }
+            if File.exists? File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin",  "#{@project_name}-plugin.php")
+                plugin_second_replace = File.read(File.join(@project_path, "wp-content", "plugins",
+                    "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/(Plugin\s+Name:\s+)(#{@project_name})/, "Plugin Name: #{@project_name.capitalize}")
+                File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
+                    file.puts plugin_second_replace }
+            end
 
-            plugin_third_replace = File.read(File.join(@project_path, "wp-content", "plugins",
-                "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/(Description:\s+Site\s+specific\s+code\s+changes\s+for\s+)(#{@project_name})/, "Description: Site specific code changes for #{@project_name.capitalize}")
-            File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
-                file.puts plugin_third_replace }
+            if File.exists? File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin",  "#{@project_name}-plugin.php")
+                plugin_third_replace = File.read(File.join(@project_path, "wp-content", "plugins",
+                    "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/(Description:\s+Site\s+specific\s+code\s+changes\s+for\s+)(#{@project_name})/, "Description: Site specific code changes for #{@project_name.capitalize}")
+                File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
+                    file.puts plugin_third_replace }
+            end
 
-            function_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php")).gsub(/mask/, "#{@project_name}")
-            guard_replace = File.read(File.join(@project_path, "Guardfile")).gsub(/mask/, "#{@project_name}")
-            ie_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss")).gsub(/themes\/mask/, "themes/#{@project_name}")
+            function_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php")).gsub(/#{template_name}/, "#{@project_name}")
+            if File.exists? File.join(@project_path, "Guardfile")
+                guard_replace = File.read(File.join(@project_path, "Guardfile")).gsub(/#{template_name}/, "#{@project_name}")
+            end
+            ie_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss")).gsub(/themes\/#{template_name}/, "themes/#{@project_name}")
             # - open file and perform find and replace
 
             File.open(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php"), "w") { |file| file.puts function_replace }
@@ -213,7 +205,7 @@ module Obi
                 staging_url = @config_settings['staging_domain']
             end
             wp_config.gsub!(/staging_tld/, staging_url.gsub(/\./){ |match| "\\" + match  })
-                     .gsub!(/mask/, "#{@project_name}")
+                     .gsub!(/#{template_name}/, "#{@project_name}")
                      .gsub!(Regexp.new(Regexp.escape(replace_config_value)), "#{find_config_value}")
                      .gsub!(/\/\/\s*Insert_Salts_Below/, Net::HTTP.get('api.wordpress.org', '/secret-key/1.1/salt'))
                      .gsub!(/(table_prefix\s*=\s*')(wp_')/) {"#{$1}#{@project_name[0,3]}_'"}
