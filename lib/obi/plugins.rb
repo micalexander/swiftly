@@ -6,7 +6,7 @@ module Obi
 
 		def self.plugin_file
 			local_project_directory = Configuration.settings['local_project_directory']
-			File.join local_project_directory, '.obi', 'plugins', '_plugins' unless !File.exists? File.join local_project_directory, '.obi', 'plugins', '_plugins'
+			File.join local_project_directory, '.obi', 'plugins', '_plugins.yml' unless !File.exists? File.join local_project_directory, '.obi', 'plugins', '_plugins.yml'
 		end
 
 		def self.settings_check
@@ -20,14 +20,18 @@ module Obi
 			plugins_found = ""
 			plugin_not_found = ""
 			if plugins
-				plugins['plugins'].each do |plugin|
-					found_plugin = File.join Configuration.settings['local_project_directory'], '.obi', 'plugins', plugin
-					plugins_found += "run_activate_plugin( '#{plugin}' );\n" unless !File.exists? found_plugin
-					plugin_not_found += "\n//obi: plugin not found - " + plugin unless File.exists? found_plugin
+				if ( plugins.count > 0 and !plugins == nil)
+					plugins['plugins'].each do |plugin|
+						found_plugin = File.join Configuration.settings['local_project_directory'], '.obi', 'plugins', plugin
+						plugins_found += "run_activate_plugin( '#{plugin}' );\n" unless !File.exists? found_plugin
+						plugin_not_found += "\n//obi: plugin not found - " + plugin unless File.exists? found_plugin
+					end
+				else
+					return "\n//obi: there were no plugins listed in the _plugin.yml file\n\n"
 				end
 				return plugins_found, plugin_not_found + "\n\n"
 			else
-				return "\n//obi: no plugins have been added to the plugin manifest\n\n"
+				return "\n//obi: there were no plugins listed in the _plugin.yml file\n\n"
 			end
 		end
 

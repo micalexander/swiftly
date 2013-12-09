@@ -1,5 +1,7 @@
 require 'Thor'
 require 'obi/Obi_module'
+require 'obi/templates_config'
+require 'obi/plugins_config'
 require 'obi/Configuration'
 require 'obi/Menu'
 require 'obi/Project'
@@ -57,16 +59,14 @@ module Obi
 		def plugins
 			Upgrade.check
             Configuration.settings
-           	FileUtils.mkdir_p(File.join( Configuration.settings['local_project_directory'], '.obi','plugins')) unless File.exists?(File.join( Configuration.settings['local_project_directory'], '.obi', 'plugins'))
-           	FileUtils.touch(File.join( Configuration.settings['local_project_directory'], '.obi', 'plugins', '_plugins' )) unless File.exists? File.join( Configuration.settings['local_project_directory'], '.obi', 'plugins', '_plugins' )
+           	PluginsConfig.new.create
 		end
 
 		desc "templates", "Create global template directory in working project directory"
 		def templates
 			Upgrade.check
             Configuration.settings
-           	FileUtils.mkdir_p(File.join( Configuration.settings['local_project_directory'], '.obi','templates')) unless File.exists?(File.join( Configuration.settings['local_project_directory'], '.obi', 'templates'))
-           	FileUtils.touch(File.join( Configuration.settings['local_project_directory'], '.obi', 'templates', '_templates' )) unless File.exists? File.join( Configuration.settings['local_project_directory'], '.obi', 'templates', '_templates' )
+           	TemplatesConfig.new.create
 		end
 
 

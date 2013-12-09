@@ -60,6 +60,12 @@ module Obi
 
         def wordpress template
 
+            if ( template != '' )
+                if ( !Templates.settings_check )
+                    abort "\nobi: to specify a template for obi to use, [ obi templates ] must be run first and \"_template\" file must be configured\n\n"
+                end
+            end
+
             create_directories
 
             # download wordpress and place it in the project directory
@@ -176,7 +182,9 @@ module Obi
             # - open file and perform find and replace
 
             File.open(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php"), "w") { |file| file.puts function_replace }
-            File.open(File.join(@project_path, "Guardfile"), "w") { |file| file.puts guard_replace }
+            if File.exists? File.join(@project_path, "Guardfile")
+                File.open(File.join(@project_path, "Guardfile"), "w") { |file| file.puts guard_replace }
+            end
             File.open(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss"), "w") { |file| file.puts ie_replace }
 
             # find and replace variables on wp-config file

@@ -7,7 +7,7 @@ module Obi
 
 		def self.templates_file
 			local_project_directory = Configuration.settings['local_project_directory']
-			File.join local_project_directory, '.obi', 'templates', '_templates' unless !File.exists? File.join local_project_directory, '.obi', 'templates', '_templates'
+			File.join local_project_directory, '.obi', 'templates', '_templates.yml' unless !File.exists? File.join local_project_directory, '.obi', 'templates', '_templates.yml'
 		end
 
 		def self.settings_check
@@ -19,12 +19,17 @@ module Obi
 		def self.search_templates( template_choice = nil )
 
 			if self.settings_check
-				self.settings_check['templates'].each do |template|
-					if template['name'] == template_choice
-						return template.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+				if self.settings_check.count > 0
+					self.settings_check['templates'].each do |template|
+						if template['name'] == template_choice
+							return template.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+						end
 					end
+					return { :name=>template_choice, :remote=>false }
+				else
+					puts "\nobi: there are no templates listed in the _templates.yml file\n\n"
 				end
-				return { :name=>template_choice, :remote=>false }
+				exit
 			end
 		end
 
@@ -40,6 +45,7 @@ module Obi
 				template_values = options.merge searched_template
 
 				# check to see if the user has disabled requested template
+
 				if template_values[:enabled] == true
 
 					# check to see if remote is set to false for requested template
@@ -57,6 +63,8 @@ module Obi
 					else
 						abort "\nobi: the template \"#{template}\" could not be found\n\n"
 					end
+				else
+					abort "\nobi: the template \"#{template}\" is not enabled\n\n"
 				end
 			end
 
