@@ -4,6 +4,7 @@ require 'obi/Configuration'
 require 'obi/Menu'
 require 'obi/Project'
 require 'obi/Upgrade'
+require 'obi/Rsync'
 
 
 module Obi
@@ -234,6 +235,57 @@ module Obi
 		end
 		no_tasks do
 			alias_method :d, :database
+		end
+
+		desc "rsync [option] [project_name]", "Mirror two directories by passing a project name, origin and destination"
+
+		method_option :lts, :type => :boolean, :desc => "Local to staging"
+		method_option :ltp, :type => :boolean, :desc => "Local to production"
+		method_option :stl, :type => :boolean, :desc => "Staging to local"
+		method_option :stp, :type => :boolean, :desc => "Staging to production"
+		method_option :ptl, :type => :boolean, :desc => "Production to local"
+		method_option :pts, :type => :boolean, :desc => "Production to staging"
+
+		def rsync(project_name)
+
+			Upgrade.check
+            Obi::Configuration.settings
+			if options.keys.count == 1
+
+				# get the necessary database credentials
+				if options[:lts]
+					origin = "local"
+					destination = "staging"
+				elsif options[:ltp]
+					origin = "local"
+					destination = "production"
+				elsif options[:stl]
+					origin = "staging"
+					destination = "local"
+				elsif options[:stp]
+					origin = "staging"
+					destination = "production"
+				elsif options[:ptl]
+					origin = "production"
+					destination = "local"
+				elsif options[:pts]
+					origin = "production"
+					destination = "staging"
+				end
+
+				Rsync.sync project_name, origin, destination
+
+			else
+				say
+				say "obi: Not sure what you are trying to do";
+				say
+				say `bin/obi3 -h rsync`
+				say
+			end
+		end
+
+		no_tasks do
+			alias_method :r, :rsync
 		end
 
 	end
