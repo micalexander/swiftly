@@ -30,6 +30,8 @@ module Obi
 
 		def upgrade( project_name = nil )
 
+			project_name = get_current_directory_basename(project_name)
+
 			if options[:project] and !options[:all] and !options[:global]
 
 				Upgrade.project_config project_name
@@ -77,6 +79,7 @@ module Obi
 		def new(project_name, template = '')
 
 			Upgrade.check
+			project_name = get_current_directory_basename(project_name)
             Obi::Configuration.settings
 			project = Obi::Project.new(project_name)
 			if options.one?
@@ -103,6 +106,7 @@ module Obi
 		def kill(project_name)
 
 			Upgrade.check
+			project_name = get_current_directory_basename(project_name)
 			database = Database.new(project_name)
 			credentials = Environment.new
 
@@ -153,7 +157,8 @@ module Obi
 		def database( project_name, import_file = "" )
 
 			Upgrade.check
-			database = Obi::Database.new( get_current_directory_basename(project_name) )
+			project_name = get_current_directory_basename(project_name)
+			database = Obi::Database.new( project_name )
 
 			# check to see if one of the options was backup
 			if options.keys.count == 2 and options[:backup]
@@ -249,6 +254,7 @@ module Obi
 		def rsync(project_name)
 
 			Upgrade.check
+			project_name = get_current_directory_basename(project_name)
             Obi::Configuration.settings
 			if options.keys.count == 1
 
