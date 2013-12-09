@@ -46,7 +46,7 @@ module Obi
 				say
 				say "obi: Not sure what you are trying to do";
 				say
-				say `bin/obi -h upgrade`
+				say `obi -h upgrade`
 				say
 			end
 		end
@@ -229,7 +229,7 @@ module Obi
 				say
 				say "obi: Not sure what you are trying to do";
 				say
-				say `bin/obi -h database`
+				say `obi -h database`
 				say
 			end
 		end
@@ -279,7 +279,7 @@ module Obi
 				say
 				say "obi: Not sure what you are trying to do";
 				say
-				say `bin/obi -h rsync`
+				say `obi -h rsync`
 				say
 			end
 		end
