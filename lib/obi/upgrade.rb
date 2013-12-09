@@ -71,7 +71,7 @@ module Obi
 				project_config = File.join( @@settings['local_project_directory'], project_name, '.obi', 'config' )
 				if YAML.load_file( project_config )['enable_production_ssh'] != 'enable_production_ssh'
 					puts
-					puts  "obi: #{project_name} is already up to date."
+					puts  "obi: #{project_name} is already \033[32mup to date\033[0m."
 					puts
 				else
 					project? File.join( @@settings['local_project_directory'], project_name )
@@ -123,8 +123,13 @@ module Obi
 
 			projects = Dir.glob(File.join( @@settings['local_project_directory'],'*' )).select {|f| File.directory? f}
 			projects.each do |project|
-
-				project_config File.basename project
+				if File.exists? File.join( project, '.obi', 'config' )
+					project_config File.basename project
+				else
+					puts
+					puts  "obi: #{File.basename project} does not contain an \033[33m.obi/config file.\033[0m"
+					puts
+				end
 
 			end
 		end
