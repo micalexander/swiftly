@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
     s.authors      = ["Mic Alexander"]
     s.email        = 'mic@micalexander.com'
     s.files        = Dir['lib/   *.rb']
-    s.executables  = ["obi3"]
+    s.executables  = ["obi"]
 
     s.required_rubygems_version = ">= 2.1.3"
     s.add_dependency "git", "~> 1.2.6"
