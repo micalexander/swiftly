@@ -9,7 +9,7 @@ module Obi
 
 		# get config file
 		def self.global_file
-			@@global_config = File.absolute_path( File.join(Dir.home, ".obi3config" ))
+			@@global_config = File.absolute_path( File.join(Dir.home, ".obiconfig" ))
 		end
 
 		# get config settings from config file
