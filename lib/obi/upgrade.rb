@@ -4,7 +4,8 @@ require "obi/Obi_module"
 module Obi
 	class Upgrade
 
-		include Obi::ProjectExist
+		include ProjectExist
+		extend ProjectExist
 
 		@@settings = Configuration.settings 'upgrade'
 
@@ -73,7 +74,7 @@ module Obi
 					puts  "obi: #{project_name} is already up to date."
 					puts
 				else
-					# project? File.join( @@settings['local_project_directory'], project_name )
+					project? File.join( @@settings['local_project_directory'], project_name )
 
 					pattern = /((^[a-zA-Z\d_]*?)(='|=\()(('.*?|.*?)('\n|'\))))|((\#(\s|\S)(.*?)\n\#))/
 
