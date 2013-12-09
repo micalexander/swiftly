@@ -60,9 +60,6 @@ module Obi
 
         def wordpress template
 
-            # puts Templates.load_template
-
-
             create_directories
 
             # download wordpress and place it in the project directory
@@ -224,8 +221,37 @@ module Obi
             database.create(credentials)
             # enable git repository
             enable_git
-            `cd "#{@project_path}" bundle; bower update; guard; sass sprockets`
+            # puts @project_path
+            if File.exists? File.join( @project_path, 'Gemfile' )
+                bundle_cmd = "cd \"#{@project_path}\"; bundle;"
+                Open3.popen2e(bundle_cmd) do |stdin, stdout_err, wait_thr|
+                    exit_status = wait_thr.value
+                    while line = stdout_err.gets
+                        puts "obi: #{line}"
+                    end
+                    unless exit_status.success?
+                        abort "obi: command failed - #{bundle_cmd}"
+                    end
+                end
+            end
 
+            if File.exists? File.join( @project_path, 'Gemfile' )
+                bower_cmd = "cd \"#{@project_path}\"; bower update;"
+                Open3.popen2e(bower_cmd) do |stdin, stdout_err, wait_thr|
+                    exit_status = wait_thr.value
+                    while line = stdout_err.gets
+                        puts "obi: #{line}"
+                    end
+                    unless exit_status.success?
+                        abort "obi: command failed - #{bower_cmd}"
+                    end
+                end
+            end
+
+            # guard will keep obi running so we'll just shell it out here
+            if File.exists? File.join( @project_path, 'Guardfile' )
+                `cd "#{@project_path}"; guard;`
+            end
         end
     end
 end
