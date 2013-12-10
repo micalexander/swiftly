@@ -20,14 +20,16 @@ module Obi
 			plugins_found = ""
 			plugin_not_found = ""
 			if plugins
-				if ( plugins.count > 0 and !plugins == nil)
+				# puts plugins
+				# exit
+				if ( plugins.count > 0 && plugins != nil)
 					plugins['plugins'].each do |plugin|
 						found_plugin = File.join Configuration.settings['local_project_directory'], '.obi', 'plugins', plugin
 						plugins_found += "run_activate_plugin( '#{plugin}' );\n" unless !File.exists? found_plugin
 						plugin_not_found += "\n//obi: plugin not found - " + plugin unless File.exists? found_plugin
 					end
 				else
-					return "\n//obi: there were no plugins listed in the _plugin.yml file\n\n"
+					return "\n//obi: 1there were no plugins listed in the _plugin.yml file\n\n"
 				end
 				return plugins_found, plugin_not_found + "\n\n"
 			else
