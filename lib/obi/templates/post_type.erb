@@ -1,0 +1,88 @@
+<?php
+function create_<%= project_name[0..9] %>_<%= post_type %>_post_type() {
+	// Setup Custom Post Type
+	register_post_type(
+		'<%= project_name[0..9] %>-<%= post_type %>',
+		array(
+			'labels' => array(
+			'name'                       => _x( '<%= post_type.pluralize.capitalize %>', 'taxonomy general name' ),
+			'singular_name'              => _x( '<%= post_type.capitalize %>', 'taxonomy singular name' ),
+			'menu_name'                  => __( '<%= post_type.pluralize.capitalize %>' ),
+			'all_items'                  => __( 'All <%= post_type.pluralize.capitalize %>' ),
+			'add_new'                 	 => __( 'Add New <%= post_type.capitalize %>' ),
+			'add_new_item'               => __( 'Add New <%= post_type.capitalize %>' ),
+			'edit_item'                  => __( 'Edit <%= post_type.capitalize %>' ),
+			'new_item'                   => __( 'New <%= post_type.capitalize %>' ),
+			'view_item'                  => __( 'View <%= post_type.capitalize %>' ),
+			'search_items'               => __( 'Search <%= post_type.pluralize.capitalize %>' ),
+			'not_found'                  => __( 'No <%= post_type.pluralize %> found.' ),
+			'not_found_in_trash'         => __( 'No <%= post_type.pluralize %> found in trash.' ),
+			'parent_item'                => null,
+			),
+			'description' => '',
+			'has_archive' => true,
+			'public' => true,
+			//'show_ui' => true,
+			//'show_in_menu' => true,
+			//'capability_type' => 'post',
+			'hierarchical' => false,
+			// 'exclude_from_search' => false,
+			'supports' => array(
+					'title',
+					'editor',
+					'author',
+					'excerpt',
+					'trackbacks',
+					'comments',
+					'revisions',
+					'page-attributes',
+					'thumbnail'
+				),
+			'rewrite' => array(
+					'slug' => '<%= post_type %>'
+					)
+		)
+	);
+}
+add_action( 'init', 'create_<%= @project_name %>_<%= post_type %>_post_type' );
+
+function <%= post_type %>_type_init() {
+	// Setup Custom Taxonomy
+	register_taxonomy(
+		'<%= post_type %>-type',
+		array( '<%= project_name[0..9] %>-<%= post_type %>' ),
+	array(
+		'labels' => array(
+						'name'                       => _x( '<%= post_type.pluralize.capitalize %>', 'taxonomy general name' ),
+						'singular_name'              => _x( '<%= post_type.capitalize %>', 'taxonomy singular name' ),
+						'menu_name'                  => __( '<%= post_type.pluralize.capitalize %>' ),
+						'all_items'                  => __( 'All <%= post_type.pluralize.capitalize %>' ),
+						'edit_item'                  => __( 'Edit <%= post_type.capitalize %>' ),
+						'view_item'                  => __( 'View <%= post_type.capitalize %>' ),
+						'update_item'                => __( 'Update <%= post_type.capitalize %>' ),
+						'add_new_item'               => __( 'Add New <%= post_type.capitalize %>' ),
+						'parent_item'                => null,
+						'parent_item_colon'          => null,
+						'search_items'               => __( 'Search <%= post_type.pluralize.capitalize %>' ),
+						'popular_items'              => __( 'Popular <%= post_type.pluralize.capitalize %>' ),
+						'separate_items_with_commas' => __( 'Separate <%= post_type.pluralize.capitalize %> with commas' ),
+						'add_or_remove_items'        => __( 'Add or remove <%= post_type %>' ),
+						'choose_from_most_used'      => __( 'Choose from the most used <%= post_type %>' ),
+						'not_found'                  => __( 'No <%= post_type.pluralize.capitalize %> found.' ),
+						),
+		'hierarchical' => true,
+		'show_ui' => true,
+		'query_var' => true,
+		'rewrite' => array(
+						'slug' => '<%= post_type %>-type',
+						// 'hierarchical' => true
+						)
+		)
+	);
+}
+add_action( 'init', '<%= post_type %>_type_init' );
+
+// remove_post_type_support('<%= @project_name %>-<%= post_type %>', '');
+
+
+?>

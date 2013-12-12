@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
     s.add_dependency "git", "~> 1.2.6"
     s.add_dependency "rubyzip", "~> 1.0.0"
     s.add_dependency "thor", "~> 0.18.1"
+    s.add_dependency "activesupport", "~> 4.0.1"
 
     # The following block of code determines the files that should be included
     # in the gem. It does this by reading all the files in the directory where

@@ -5,6 +5,7 @@ require 'obi/plugins_config'
 require 'obi/Configuration'
 require 'obi/Menu'
 require 'obi/Project'
+require 'obi/post_type'
 require 'obi/Upgrade'
 require 'obi/Rsync'
 
@@ -292,6 +293,31 @@ module Obi
 
 		no_tasks do
 			alias_method :r, :rsync
+		end
+
+		desc "generate [option] [project_name] [post_type]", "Generate wordpress templates"
+
+		method_option :custom_post_type, :aliases => "-c", :type => :boolean, :desc => "Generate custom post type"
+
+		def generate( project_name, post_type, filter_by = '' )#, post_type, filter_by )
+
+			Upgrade.check
+			project_name = get_current_directory_basename(project_name)
+            Obi::Configuration.settings
+			if options.keys.count == 1
+
+				PostType.new([project_name, post_type, File.join( Configuration.settings['local_project_directory'], project_name)], {'filter_by' => "#{filter_by[/(.+[=])(.+)/, 2]}"}).invoke_all
+			else
+				say
+				say "obi: Not sure what you are trying to do";
+				say
+				say `obi -h generate`
+				say
+			end
+		end
+
+		no_tasks do
+			alias_method :g, :generate
 		end
 
 	end
