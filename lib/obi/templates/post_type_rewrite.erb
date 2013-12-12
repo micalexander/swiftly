@@ -7,7 +7,7 @@ function create_<%= project_name[0..9] %>_<%= post_type %>_post_type() {
 			'labels' => array(
 			'name'                       => _x( '<%= post_type.pluralize.capitalize %>', 'taxonomy general name' ),
 			'singular_name'              => _x( '<%= post_type.capitalize %>', 'taxonomy singular name' ),
-			'menu_name'                  => __( '<%= post_type.pluralize.capitalize %>' )
+			'menu_name'                  => __( '<%= post_type.pluralize.capitalize %>' ),
 			'all_items'                  => __( 'All <%= post_type.pluralize.capitalize %>' ),
 			'add_new'                 	 => __( 'Add New <%= post_type.capitalize %>' ),
 			'add_new_item'               => __( 'Add New <%= post_type.capitalize %>' ),
@@ -55,7 +55,7 @@ function <%= post_type %>_type_init() {
 		'labels' => array(
 						'name'                       => _x( '<%= post_type.pluralize.capitalize %>', 'taxonomy general name' ),
 						'singular_name'              => _x( '<%= post_type.capitalize %>', 'taxonomy singular name' ),
-						'menu_name'                  => __( '<%= post_type.pluralize.capitalize %>' )
+						'menu_name'                  => __( '<%= post_type.pluralize.capitalize %>' ),
 						'all_items'                  => __( 'All <%= post_type.pluralize.capitalize %>' ),
 						'edit_item'                  => __( 'Edit <%= post_type.capitalize %>' ),
 						'view_item'                  => __( 'View <%= post_type.capitalize %>' ),
@@ -85,7 +85,7 @@ add_action( 'init', '<%= post_type %>_type_init' );
 // remove_post_type_support('<%= @project_name %>-<%= post_type %>', '');
 
 function <%= post_type %>_add_rewrite_rules($aRules) {
-	$aNewRules = array('<%= post_type %>/<%= @filter_by_regexp %>' => 'index.php?post_type=<%= @project_name %>-<%= post_type %>&<%= @filter_by %>=$matches[1]');
+	$aNewRules = array('<%= post_type %>/<%= @filter_by_regexp %>' => 'index.php?post_type=<%= @project_name %>-<%= post_type %><%= @filter_by %><%= @match_2 %>');
  	$aRules = $aNewRules + $aRules;
 	return $aRules;
 }
