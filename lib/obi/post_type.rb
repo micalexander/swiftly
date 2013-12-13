@@ -22,9 +22,9 @@ module Obi
 		def create_post
 			@match_2 = ''
 			if options[:filter_by] == 'published-date' or options[:filter_by] == ''
-				@filter_by = '&int-year=$matches[1]'
-				@filter_by_regexp = '(\d{4})/(\d{2})/??$'
-				@match_2 = '&int-month=$matches[2]'
+				@filter_by = '&int-year=$matches[1]$&int-month=$matches[2]'
+				@taxonomy_filter_by = '=$matches[1]&int-year=$matches[2]$&int-month=$matches[3]'
+				@filter_by_regexp = '(\d{4})/(\d{2})/??'
 			elsif options[:filter_by] == 'last-name'
 				@filter_by = '&letter=$matches[1]'
 				@filter_by_regexp = '([A-Z])/??$'
@@ -36,7 +36,7 @@ module Obi
 				exit
 			end
 
-			template File.join( 'templates', 'post_type_rewrite.erb' ), File.join( "#{project_path}", 'wp-content', 'plugins', "#{project_name}-specific-plugin", 'custom-post-types',"#{post_type}.php")
+			template File.join( 'templates', 'post_type_rewrite.erb' ), File.join( "#{project_path}", 'wp-content', 'plugins', "#{project_name}-specific-plugin", 'custom-post-types',"#{post_type.pluralize}.php")
 		end
 	end
 end
