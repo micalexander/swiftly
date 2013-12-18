@@ -50,13 +50,13 @@ function <%= post_type %>_type_init() {
 	// Setup Custom Taxonomy
 	register_taxonomy(
 		'<%= post_type.singularize %>-type',
-		array( '<%= project_name[0..9] %>-<%= post_type %>' ),
+		array( '<%= project_name[0..9] %>-<%= post_type.pluralize %>' ),
 		array(
 			'labels'	=> array(
 								'name'                       => _x( '<%= post_type.pluralize.capitalize %>', 'taxonomy general name' ),
 								'singular_name'              => _x( '<%= post_type.singularize.capitalize %>', 'taxonomy singular name' ),
-								'menu_name'                  => __( '<%= post_type.pluralize.capitalize %> Types' ),
-								'all_items'                  => __( 'All <%= post_type.pluralize.capitalize %> Types' ),
+								'menu_name'                  => __( '<%= post_type.singularize.capitalize %> Types' ),
+								'all_items'                  => __( 'All <%= post_type.singularize.capitalize %> Types' ),
 								'edit_item'                  => __( 'Edit <%= post_type.singularize.capitalize %> Type' ),
 								'view_item'                  => __( 'View <%= post_type.singularize.capitalize %> Type' ),
 								'update_item'                => __( 'Update <%= post_type.singularize.capitalize %> Type' ),
@@ -82,7 +82,7 @@ function <%= post_type %>_type_init() {
 }
 add_action( 'init', '<%= post_type.singularize %>_type_init' );
 
-// remove_post_type_support('<%= @project_name %>-<%= post_type.pluralize %>', '');
+// remove_post_type_support('<%= project_name[0..9] %>-<%= post_type.pluralize %>', '');
 
 function <%= post_type.pluralize %>_add_rewrite_rules($aRules) {
 	$aNewRules = array('<%= post_type.singularize %>-type/([^/]*)/?$' => 'index.php?<%= post_type.singularize %>-type=$matches[1]');
