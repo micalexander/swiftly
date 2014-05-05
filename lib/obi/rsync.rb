@@ -15,7 +15,7 @@ module Obi
 			if project_config_settings['enable_rsync'] == 1 and project_config_settings["#{origin}_ssh"] != 0
 				project_config_settings['rsync_dirs'].each do |dir|
 
-					puts sync_cmd = "rsync -rvuz --exclude-from=\"#{ File.join config_settings['local_project_directory'], project_name }/.obiignore\" \"#{self.ssh( project_name, origin )}#{self.root( project_name, origin )}#{dir}\" \"#{self.ssh( project_name, destination )}#{self.root( project_name, destination )}#{dir}\""
+					sync_cmd = "rsync -rvuz --exclude-from=\"#{ File.join config_settings['local_project_directory'], project_name }/.obiignore\" \"#{self.ssh( project_name, origin )}#{self.root( project_name, origin )}#{dir}\" \"#{self.ssh( project_name, destination )}#{self.root( project_name, destination )}#{dir}\""
 
 					Open3.popen2e(sync_cmd) do |stdin, stdout_err, wait_thr|
 						exit_status = wait_thr.value

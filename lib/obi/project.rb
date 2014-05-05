@@ -123,10 +123,11 @@ module Obi
             else
                 FileUtils.cp_r(File.join(@config_settings['local_project_directory'], '.obi', 'templates', template), File.join(@project_path, "wp-content", "themes", "#{@project_name}"))
             end
-            # move the wp-config, .htaccess, bower.json, Guardfile, Gemfile, and Gemfile.lock files to the site root
+            # move the wp-config, .htaccess, bower.json, config.rb, Guardfile, Gemfile, and Gemfile.lock files to the site root
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", ".htaccess"), @project_path ) unless !File.exists?  File.join(@project_path, "wp-content", "themes", "#{@project_name}", ".htaccess")
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "wp-config.php"), @project_path ) unless !File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "wp-config.php")
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "bower.json"), @project_path ) unless !File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "bower.json")
+            FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "config.rb"), @project_path ) unless !File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "config.rb")
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Guardfile"), @project_path ) unless !File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Guardfile")
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile"), @project_path ) unless !File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile")
             FileUtils.mv(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile.lock"), @project_path ) unless !File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "Gemfile.lock")
@@ -153,7 +154,7 @@ module Obi
 
             # find and replace the #{template_name} name with the project name
             # - text to find and replace
-                if File.exists? File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin",  "#{@project_name}-plugin.php")
+            if File.exists? File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin",  "#{@project_name}-plugin.php")
                 plugin_replace = File.read(File.join(@project_path, "wp-content", "plugins",
                     "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php")).gsub(/#{template_name}/, "#{@project_name}")
                 File.open(File.join(@project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin", "#{@project_name}-plugin.php"), "w") { |file|
@@ -174,18 +175,26 @@ module Obi
                     file.puts plugin_third_replace }
             end
 
-            function_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php")).gsub(/#{template_name}/, "#{@project_name}")
-            if File.exists? File.join(@project_path, "Guardfile")
-                guard_replace = File.read(File.join(@project_path, "Guardfile")).gsub(/#{template_name}/, "#{@project_name}")
+            if File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php")
+                function_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php")).gsub(/#{template_name}/, "#{@project_name}")
+                File.open(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php"), "w") { |file| file.puts function_replace }
             end
-            ie_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss")).gsub(/themes\/#{template_name}/, "themes/#{@project_name}")
+
+            if File.exists? File.join(@project_path, "config.rb")
+                config_rb_replace = File.read(File.join(@project_path, "config.rb")).gsub(/#{template_name}/, "#{@project_name}")
+                File.open(File.join(@project_path, "config.rb"), "w") { |file| file.puts config_rb_replace }
+            end
             # - open file and perform find and replace
 
-            File.open(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "functions.php"), "w") { |file| file.puts function_replace }
             if File.exists? File.join(@project_path, "Guardfile")
+                guard_replace = File.read(File.join(@project_path, "Guardfile")).gsub(/#{template_name}/, "#{@project_name}")
                 File.open(File.join(@project_path, "Guardfile"), "w") { |file| file.puts guard_replace }
             end
-            File.open(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss"), "w") { |file| file.puts ie_replace }
+
+            if File.exists? File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss")
+                ie_replace = File.read(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss")).gsub(/themes\/#{template_name}/, "themes/#{@project_name}")
+                File.open(File.join(@project_path, "wp-content", "themes", "#{@project_name}", "sass", "ie.scss"), "w") { |file| file.puts ie_replace }
+            end
 
             # find and replace variables on wp-config file
             # - define WP_ENV variables
@@ -219,12 +228,12 @@ module Obi
 
             # Create project's database
             credentials =   {
-                            host: "#{@config_settings['local_host']}",
-                            user: "#{@config_settings['local_user']}",
-                            pass: "#{@config_settings['local_password']}",
-                            name: "#{@project_name}_local_wp",
-                            environment: "local"
-                            }
+                host: "#{@config_settings['local_host']}",
+                user: "#{@config_settings['local_user']}",
+                pass: "#{@config_settings['local_password']}",
+                name: "#{@project_name}_local_wp",
+                environment: "local"
+            }
             database = Obi::Database.new(@project_name)
             database.create(credentials)
             # enable git repository
@@ -258,7 +267,7 @@ module Obi
 
             # guard will keep obi running so we'll just shell it out here
             if File.exists? File.join( @project_path, 'Guardfile' )
-                `cd "#{@project_path}"; guard;`
+                `cd "#{@project_path}"; bundle exec guard;`
             end
         end
     end
