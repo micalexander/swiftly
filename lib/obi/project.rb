@@ -58,11 +58,11 @@ module Obi
             enable_git
         end
 
-        def wordpress template
+        def wordpress template, dev = false
 
             if ( template != '' )
                 if ( !Templates.settings_check )
-                    abort "\nobi: to specify a template for obi to use, [ obi templates ] must be run first and \"_template\" file must be configured\n\n"
+                    abort "\nobi: to specify a template for obi to use, [ obi templates ] must be run first and \"_templates.yml\" file must be configured\n\n"
                 end
             end
 
@@ -252,7 +252,7 @@ module Obi
                 end
             end
 
-            if File.exists? File.join( @project_path, 'Gemfile' )
+            if File.exists? File.join( @project_path, 'Gemfile' ) and dev
                 bower_cmd = "cd \"#{@project_path}\"; bower update;"
                 Open3.popen2e(bower_cmd) do |stdin, stdout_err, wait_thr|
                     exit_status = wait_thr.value
@@ -266,7 +266,7 @@ module Obi
             end
 
             # guard will keep obi running so we'll just shell it out here
-            if File.exists? File.join( @project_path, 'Guardfile' )
+            if File.exists? File.join( @project_path, 'Guardfile' ) and dev
                 `cd "#{@project_path}"; bundle exec guard;`
             end
         end

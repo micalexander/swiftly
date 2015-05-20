@@ -76,14 +76,16 @@ module Obi
 		method_option :empty, :aliases => "-e", :type => :boolean, :desc => "Create an empty project"
 		method_option :git, :aliases => "-g", :type => :boolean, :desc => "Create a Git enabled project"
 		method_option :wordpress, :aliases => "-w", :type => :boolean, :desc => "Create a project with Wordpress installed"
+		method_option :dev, :aliases => "-d", :type => :boolean, :desc => "If Wordpress option is used run bower and guard"
 
 		def new(project_name, template = '')
 
 			Upgrade.check
 			project_name = get_current_directory_basename(project_name)
-            Obi::Configuration.settings
+      Obi::Configuration.settings
 			project = Obi::Project.new(project_name)
-			if options.one?
+
+			if options.length == 1
 				if options[:empty]
 					project.empty
 				elsif options[:git]
@@ -91,9 +93,13 @@ module Obi
 				elsif options[:wordpress]
 					project.wordpress template
 				end
+			elsif options.length == 2
+				if options[:wordpress] && options[:dev]
+					project.wordpress template, options[:dev]
+				end
 			else
 				puts
-				puts "obi: new expects only one option"
+				puts "obi: new expects at least one option"
 				puts
 			end
 		end

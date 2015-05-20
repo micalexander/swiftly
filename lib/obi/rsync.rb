@@ -16,14 +16,13 @@ module Obi
 				project_config_settings['rsync_dirs'].each do |dir|
 
 					sync_cmd = "rsync -rvuz --exclude-from=\"#{ File.join config_settings['local_project_directory'], project_name }/.obiignore\" \"#{self.ssh( project_name, origin )}#{self.root( project_name, origin )}#{dir}\" \"#{self.ssh( project_name, destination )}#{self.root( project_name, destination )}#{dir}\""
-
 					Open3.popen2e(sync_cmd) do |stdin, stdout_err, wait_thr|
 						exit_status = wait_thr.value
 						while line = stdout_err.gets
 							puts "obi: #{line}"
 						end
 						unless exit_status.success?
-								abort "obi: command failed - #{sync_cmd}"
+							abort "obi: command failed - #{sync_cmd}"
 						end
 					end
 				end
