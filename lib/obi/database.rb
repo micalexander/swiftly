@@ -164,12 +164,9 @@ module Obi
 			end
 
 			import(
-				destination_credentials,
-				fix_serialization(
+				destination_credentials, fix_serialization(
 					update_urls(
-						origin_credentials,
-						destination_credentials,
-						import_file
+						origin_credentials, destination_credentials, import_file
 					)
 				)
 			)

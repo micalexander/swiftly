@@ -3,14 +3,43 @@ require 'pathname'
 
 module Obi
 	module FindAndReplace
+
 		def find_and_replace(hash)
+
 			if hash[:file] == true
-				replace = File.read(hash[:input]).gsub(hash[:pattern], hash[:output])
-				File.open(hash[:input], "w") {|file| file.puts replace }
-				return hash[:input]
-	        else
+
+				if File.exists? hash[:input]
+
+					replace = File.read(hash[:input]).gsub(hash[:pattern], hash[:output])
+
+					File.open(hash[:input], "w") {|file| file.puts replace }
+
+					return hash[:input]
+
+				else
+						puts "file #{hash[:input]} does not exist"
+				end
+
+			else
+
 		 		return hash[:input].gsub(hash[:pattern], hash[:output])
+
 		 	end
+		end
+	end
+end
+
+module Obi
+	module FindAndReplaceAll
+
+		def find_and_replace_all(array)
+
+			array.each do |hash|
+
+				find_and_replace(hash)
+
+			end
+
 		end
 	end
 end
