@@ -40,7 +40,6 @@ module Obi
 								puts ""
 								exit
 						end
-
 				end
 
 				def enable_git
