@@ -36,9 +36,11 @@ module Obi
 				wp_config = JSON.parse(file)
 
 				environment_settings  = {
+					name:        "#{wp_config['name']}",
 					host:        "#{wp_config['host']}",
 					user:        "#{wp_config['user']}",
 					pass:        "#{wp_config['pass']}",
+					site:        "#{wp_config['site']}",
 					environment: "#{@environment}",
 					status:      "\033[32mwp-enabled\033[0m"
 				}
