@@ -1,8 +1,0 @@
-#!/usr/bin/env ruby
-
-APP_ROOT = File.expand_path("../../lib",__FILE__)
-$:.unshift( APP_ROOT )
-
-require 'obi/cli'
-
-Obi::CLI.start

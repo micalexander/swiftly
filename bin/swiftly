@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+APP_ROOT = File.expand_path("../../lib",__FILE__)
+$:.unshift( APP_ROOT )
+
+require 'swiftly/cli'
+require 'swiftly/init'
+
+Swiftly::CLI.start  unless  !File.exist? File.join( Dir.home, ".swiftly" )
+Swiftly::Init.start unless File.exist? File.join( Dir.home, ".swiftly" )

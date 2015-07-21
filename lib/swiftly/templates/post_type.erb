@@ -1,0 +1,98 @@
+<?php
+function create_<%= @project[:name][0..9] %>_<%= post_type_name.singularize %>_post_type() {
+	// Setup Custom Post Type
+	register_post_type(
+		'<%= @project[:name][0..9] %>-<%= post_type_name.pluralize %>',
+		array(
+			'labels'	=> array(
+							'name'                   => _x( '<%= post_type_name.pluralize.capitalize %>', 'taxonomy general name' ),
+							'singular_name'          => _x( '<%= post_type_name.singularize.capitalize %>', 'taxonomy singular name' ),
+							'menu_name'              => __( '<%= post_type_name.pluralize.capitalize %>' ),
+							'all_items'              => __( 'All <%= post_type_name.pluralize.capitalize %>' ),
+							'add_new'                => __( 'Add New <%= post_type_name.singularize.capitalize %>' ),
+							'add_new_item'           => __( 'Add New <%= post_type_name.singularize.capitalize %>' ),
+							'edit_item'              => __( 'Edit <%= post_type_name.singularize.capitalize %>' ),
+							'new_item'               => __( 'New <%= post_type_name.singularize.capitalize %>' ),
+							'view_item'              => __( 'View <%= post_type_name.singularize.capitalize %>' ),
+							'search_items'           => __( 'Search <%= post_type_name.pluralize.capitalize %>' ),
+							'not_found'              => __( 'No <%= post_type_name.pluralize %> found.' ),
+							'not_found_in_trash'     => __( 'No <%= post_type_name.pluralize %> found in trash.' ),
+							'parent_item'            => null,
+			),
+			'description'            => '',
+			'has_archive'            => true,
+			'public'                 => true,
+			//'show_ui'              => true,
+			//'show_in_menu'         => true,
+			//'capability_type'      => 'post',
+			'hierarchical'           => false,
+			// 'exclude_from_search' => false,
+			'supports'	=> array(
+								'title',
+								'editor',
+								'author',
+								'excerpt',
+								'trackbacks',
+								'comments',
+								'revisions',
+								'page-attributes',
+								'thumbnail'
+			),
+			'rewrite'	=> array(
+								'slug'	=> '<%= post_type_name.pluralize %>'
+			)
+		)
+	);
+}
+add_action( 'init', 'create_<%= @project[:name][0..9] %>_<%= post_type_name.singularize %>_post_type' );
+
+function <%= post_type_name %>_type_init() {
+	// Setup Custom Taxonomy
+	register_taxonomy(
+		'<%= post_type_name.singularize %>-type',
+		array( '<%= @project[:name][0..9] %>-<%= post_type_name.pluralize %>' ),
+		array(
+			'labels'	=> array(
+								'name'                       => _x( '<%= post_type_name.pluralize.capitalize %>', 'taxonomy general name' ),
+								'singular_name'              => _x( '<%= post_type_name.singularize.capitalize %>', 'taxonomy singular name' ),
+								'menu_name'                  => __( '<%= post_type_name.singularize.capitalize %> Types' ),
+								'all_items'                  => __( 'All <%= post_type_name.singularize.capitalize %> Types' ),
+								'edit_item'                  => __( 'Edit <%= post_type_name.singularize.capitalize %> Type' ),
+								'view_item'                  => __( 'View <%= post_type_name.singularize.capitalize %> Type' ),
+								'update_item'                => __( 'Update <%= post_type_name.singularize.capitalize %> Type' ),
+								'add_new_item'               => __( 'Add New <%= post_type_name.singularize.capitalize %> Type' ),
+								'parent_item'                => null,
+								'parent_item_colon'          => null,
+								'search_items'               => __( 'Search <%= post_type_name.pluralize.capitalize %> Types' ),
+								'popular_items'              => __( 'Popular <%= post_type_name.pluralize.capitalize %> Types' ),
+								'separate_items_with_commas' => __( 'Separate <%= post_type_name.pluralize.capitalize %> Types with commas' ),
+								'add_or_remove_items'        => __( 'Add or remove <%= post_type_name.singularize %> Types' ),
+								'choose_from_most_used'      => __( 'Choose from the most used <%= post_type_name.singularize %> Types' ),
+								'not_found'                  => __( 'No <%= post_type_name.pluralize.capitalize %> Types found.' ),
+			),
+			'hierarchical'               => true,
+			'show_ui'                    => true,
+			'query_var'                  => true,
+			'rewrite'	=> array(
+								'slug'            => '<%= post_type_name.singularize %>-type',
+								// 'hierarchical' => true
+			)
+		)
+	);
+}
+add_action( 'init', '<%= post_type_name.singularize %>_type_init' );
+
+// remove_post_type_support('<%= @project[:name][0..9] %>-<%= post_type_name.pluralize %>', '');
+
+function <%= post_type_name.pluralize %>_add_rewrite_rules($aRules) {
+	$aNewRules = array('<%= post_type_name.singularize %>-type/([^/]*)/?$' => 'index.php?<%= post_type_name.singularize %>-type=$matches[1]');
+	$aNewRules2  = array('<%= post_type_name.pluralize %>/<%= @filter_regexp %>' => 'index.php?post_type=<%= @project[:name] %>-<%= post_type_name.pluralize %><%= @filter %>');
+	$aNewRules1 = array('<%= post_type_name.singularize %>-type/([^/]*)/<%= @filter_regexp %>' => 'index.php?<%= post_type_name.singularize %>-type<%= @taxonomy_filter %>');
+	$aRules     = $aNewRules + $aNewRules1 + $aNewRules2 + $aRules;
+	return $aRules;
+}
+
+// hook add_rewrite_rules function into rewrite_rules_array
+add_filter('rewrite_rules_array', '<%= post_type_name.pluralize %>_add_rewrite_rules');
+
+?>
