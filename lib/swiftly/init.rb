@@ -1,62 +1,126 @@
 require 'thor'
 require 'json'
 require 'swiftly/config_global_generator'
+require 'swiftly/config_swiftlyfile_generator'
 require 'swiftly/app_module'
 
 module Swiftly
-	class Init < Thor
+  class Init < Thor
 
-		include Thor::Actions
-		include Helpers
+    include Thor::Actions
+    include Helpers
 
-		desc "init", "Initiate  #{APP_NAME.capitalize} for the first time"
+    desc "init", "Initiate  #{APP_NAME.capitalize} for the first time"
 
-		def init
+    def init
 
-			say # spacer
+      say # spacer
 
-			say "\t\t#{APP_NAME} #{VERSION} Development Manager\n\n", :blue
+      say "\t\t#{APP_NAME} #{VERSION} Development Manager\n\n", :blue
 
-			say_status "#{APP_NAME}:", "Thanks for trying out #{APP_NAME}. Lets get started!", :green
+      say_status "#{APP_NAME}:", "Thanks for trying out #{APP_NAME}. Lets get started!", :green
 
-			settings = []
+      settings = []
 
-			inside Dir.home do
+      inside Dir.home do
 
-				questions = {
-					sites:   "\n\n--> What is the absolute path to the folder \n\s\s\s\swhere you keep all of your sites? (#{Dir.home}):",
-					db_host: "\n--> What is your local hostname? (localhost):",
-					db_user: "\n--> What is your local mysql username? (root):",
-					db_pass: "\n--> What is your local mysql password? (root):"
-				}
+        responses = ['y','Y','']
 
-				questions.each do |type, question|
+        questions = {
+          sites_path: "\n\n--> What is the absolute path to the folder \n\s\s\s\swhere you keep all of your sites? (\e[0;m#{Dir.home}\e[33;m):",
+          db_host:    "\n--> What is your local hostname? (\e[0;mlocalhost\e[33;m):",
+          db_user:    "\n--> What is your local mysql username? (\e[0;mroot\e[33;m):",
+          db_pass:    "\n--> What is your local mysql password?"
+        }
 
-					answer = type === :sites ? File.expand_path( ask(question, :yellow, :path => true) ) : ask( question, :yellow, :path => true )
+        questions.each do |type, question|
 
-					until yes? "\n--> Got it! Is this correct? #{answer = answer == "" ? question[/\((.*)\)/, 1] : answer} [Y|n]", :green do
+          confirm = false
 
-						answer = type === :sites ? File.expand_path( ask(question, :yellow, :path => true) ) : ask( question, :yellow, :path => true )
+          until confirm == true do
 
-					end
+            if type === :sites_path
 
-					settings << answer
+              answer = File.expand_path( ask question, :yellow, :path => true )
 
-				end
+            elsif type === :db_pass
 
-				say_status "\n\s\s\s\sThats it!", "You can now run `#{APP_NAME} help` for more options."
+              answer = ask question, :yellow, :echo => false
 
-			end
+            else
 
-			Swiftly::ConfigGlobalGenerator.new(
-				settings
-			).invoke_all
+              answer = ask question, :yellow
 
-			ConfigSwiftlyfileGenerator.new.invoke_all
+            end
 
-		end
+            if type === :sites_path && answer == ''
 
-		default_task :init
+              answer = Dir.home
 
-	end
+            elsif type === :db_pass
+
+              password = ask "\n\n--> Please re-enter your password?", :yellow, :echo => false
+
+              say #spacer
+
+              until password == answer
+
+                say_status "#{APP_NAME}:", "Passwords did not match please try again.\n", :yellow
+
+                answer = ask question, :yellow, :echo => false
+
+                password = ask "\n--> Please re-enter your password?\n", :yellow, :echo => false
+
+              end
+
+              if password == answer
+
+                confirm = true
+
+              end
+
+            elsif answer == ''
+
+              if question[/\e\[[0-9;]*[a-zA-Z](.*)\e\[[0-9;]*[a-zA-Z]/, 1] == ''
+
+                answer = nil
+
+              else
+
+                answer = question[/\e\[[0-9;]*[a-zA-Z](.*)\e\[[0-9;]*[a-zA-Z]/, 1]
+
+              end
+            end
+
+            unless type === :db_pass
+
+
+
+              if responses.include? ask( "\n--> Got it! Is this correct? \e[32;m#{answer}\e[0;m [Y|n]")
+
+                  confirm = true
+
+              end
+            end
+          end
+
+            settings << answer
+
+        end
+
+        say_status "\n\s\s\s\sThats it!", "You can now run `#{APP_NAME} help` for more options."
+
+      end
+
+      Swiftly::ConfigGlobalGenerator.new(
+        settings
+      ).invoke_all
+
+      ConfigSwiftlyfileGenerator.new.invoke_all
+
+    end
+
+    default_task :init
+
+  end
 end

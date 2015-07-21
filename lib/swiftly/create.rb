@@ -8,89 +8,89 @@ require 'swiftly/create_git'
 require 'swiftly/create_wordpress'
 
 module Swiftly
-	class Create < Thor
+  class Create < Thor
 
-		include Helpers
+    include Helpers
 
-		desc "create project PROJECT_NAME", "Create a create project"
+    desc "create project PROJECT_NAME", "Create a create project"
 
-		def project( project_name )
+    def project( project_name )
 
-			project_path = File.join(
-				Swiftly::Config.load( :global )[:sites_path],
-				project_name
-			)
+      project_path = File.join(
+        Swiftly::Config.load( :global )[:sites_path],
+        project_name
+      )
 
-			CreateProject.new([
-				project_name,
-				project_path
-			]).invoke_all
+      CreateProject.new([
+        project_name,
+        project_path
+      ]).invoke_all
 
-		end
+    end
 
-		desc "create git PROJECT_NAME", "Create a create git enabled project"
+    desc "create git PROJECT_NAME", "Create a create git enabled project"
 
-		def git( project_name )
+    def git( project_name )
 
-			settings = Swiftly::Config.load( :global )
+      settings = Swiftly::Config.load( :global )
 
-			project_path = File.join(
-				settings[:sites_path],
-				project_name
-			)
+      project_path = File.join(
+        settings[:sites_path],
+        project_name
+      )
 
-			CreateProject.new( [
-				project_name,
-				project_path
-			] ).invoke_all
+      CreateProject.new( [
+        project_name,
+        project_path
+      ] ).invoke_all
 
-			CreateGit.new([
-				project_path
-			]).invoke_all
+      CreateGit.new([
+        project_path
+      ]).invoke_all
 
-		end
+    end
 
-		desc "create git PROJECT_NAME", "Create a create wordpress (git enabled) project"
-		method_option :template, aliases: '-t', type: :string, default: :default, desc: 'Provide the name of the template to use'
+    desc "create git PROJECT_NAME", "Create a create wordpress (git enabled) project"
+    method_option :template, aliases: '-t', type: :string, default: :default, desc: 'Provide the name of the template to use'
 
 
-		def wordpress( project_name )
+    def wordpress( project_name )
 
-			settings = Swiftly::Config.load( :global )
+      settings = Swiftly::Config.load( :global )
 
-			if ( options[:template] == :default )
+      if ( options[:template] == :default )
 
-				template = Swiftly::AddOn.load_default_template framework: :wordpress, type: :template
+        template = Swiftly::AddOn.load_default_template framework: :wordpress, type: :template
 
-			else
+      else
 
-				template = Swiftly::AddOn.load framework: :wordpress, type: :template, name: options[:template]
+        template = Swiftly::AddOn.load framework: :wordpress, type: :template, name: options[:template]
 
-			end
+      end
 
-			project_path = File.join(
-				settings[:sites_path],
-				project_name
-			)
+      project_path = File.join(
+        settings[:sites_path],
+        project_name
+      )
 
-			CreateProject.new([
-				project_name,
-				project_path
-			]).invoke_all
+      CreateProject.new([
+        project_name,
+        project_path
+      ]).invoke_all
 
-			CreateWordpress.new([
-				project_name,
-				template,
-				settings,
-				project_path
-			]).invoke_all
+      CreateWordpress.new([
+        project_name,
+        template,
+        settings,
+        project_path
+      ]).invoke_all
 
-			CreateGit.new([
-				project_path
-			]).invoke_all
+      CreateGit.new([
+        project_path
+      ]).invoke_all
 
-		end
-	end
+    end
+  end
 end
 
 

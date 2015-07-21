@@ -1,6 +1,6 @@
 # :wordpress:
 #  :template:
-#    - :name: mask
+#    - :name:
 #      :remote: https://github.com/micalexander/mask/archive/master.zip
 #      :status: :disabled
 #  :plugins:

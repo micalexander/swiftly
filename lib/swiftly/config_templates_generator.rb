@@ -1,32 +1,33 @@
 require "thor/group"
 
 module Swiftly
-	class ConfigTemplateGenerator < Thor::Group
+  class ConfigTemplateGenerator < Thor::Group
 
-		include Thor::Actions
+    include Thor::Actions
 
-		desc "Handles the creation of the _templates file."
+    desc "Handles the creation of the _templates file."
 
-		def self.source_root
-			File.dirname(__FILE__)
-		end
+    def self.source_root
+      File.dirname(__FILE__)
+    end
 
-		def create
+    def create
 
-			settings = Swiftly::Config.load( :global )
+      settings = Swiftly::Config.load( :global )
 
-			template(
-				File.join(
-					'templates',
-					'config_templates.erb'
-				),
-				File.join(
-					settings[:sites_path],
-					'config',
-					'templates',
-					'_templates.yml'
-				)
-			)
-		end
-	end
+      template(
+        File.join(
+          'templates',
+          'config_templates.erb'
+        ),
+        File.join(
+          settings[:sites_path],
+          'config',
+          'templates',
+          '_templates.yml'
+        )
+      )
+
+    end
+  end
 end

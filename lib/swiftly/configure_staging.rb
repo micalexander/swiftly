@@ -2,40 +2,40 @@ require 'yaml'
 require 'swiftly/app_module'
 
 module Swiftly
-	class Staging < Thor
+  class Staging < Thor
 
-		include Helpers
+    include Helpers
 
-		desc "configure staging domain", "Configure staging domain"
+    desc "configure staging domain", "Configure staging domain"
 
-		def domain( value = false )
+    def domain( value = false )
 
-			update_setting_dialog( :staging, :domain, value)
+      update_setting_dialog( :staging, :domain, value)
 
-		end
+    end
 
-		desc "configure staging host", "Configure staging hostname"
+    desc "configure staging host", "Configure staging hostname"
 
-		def host( hostname = false )
+    def host( hostname = false )
 
-			update_setting_dialog( :staging, :db_host, value)
+      update_setting_dialog( :staging, :db_host, value)
 
-		end
+    end
 
-		desc "configure staging username", "Configure staging database username"
+    desc "configure staging username", "Configure staging database username"
 
-		def username( username = false )
+    def username( username = false )
 
-			update_setting_dialog( :staging, :db_user, value)
+      update_setting_dialog( :staging, :db_user, value)
 
-		end
+    end
 
-		desc "configure staging password", "Configure staging database password"
+    desc "configure staging password", "Configure staging database password"
 
-		def password( password = false )
+    def password( password = false )
 
-			update_setting_dialog( :staging, :db_pass, value)
+      update_setting_dialog( :staging, :db_pass, value)
 
-		end
-	end
+    end
+  end
 end

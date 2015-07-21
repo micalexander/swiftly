@@ -3,32 +3,32 @@ require 'swiftly/app_module'
 require 'swiftly/configure'
 
 module Swiftly
-	class Local < Thor
+  class Local < Thor
 
-		include Helpers
+    include Helpers
 
-		desc "configure local host", "Configure local hostname"
+    desc "configure local host", "Configure local hostname"
 
-		def host( value = false )
+    def host( value = false )
 
-			update_setting_dialog( :local, :db_host, value )
+      update_setting_dialog( :local, :db_host, value )
 
-		end
+    end
 
-		desc "configure local username", "Configure local database username"
+    desc "configure local username", "Configure local database username"
 
-		def username( value = false )
+    def username( value = false )
 
-			update_setting_dialog( :local, :db_user, value )
+      update_setting_dialog( :local, :db_user, value )
 
-		end
+    end
 
-		desc "configure local password", "Configure local database password"
+    desc "configure local password", "Configure local database password"
 
-		def password( value = false )
+    def password( value = false )
 
-			update_setting_dialog( :local, :db_pass, value )
+      update_setting_dialog( :local, :db_pass, value )
 
-		end
-	end
+    end
+  end
 end

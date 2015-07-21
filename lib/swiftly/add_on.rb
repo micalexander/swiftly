@@ -7,6 +7,7 @@ module Swiftly
     include Thor::Actions
 
     no_commands do
+
       def self.file
 
         @settings = Swiftly::Config.load :global
@@ -52,7 +53,7 @@ module Swiftly
 
         end
 
-        if ( !template.nil? || template[:remote] =~ /^#{URI::regexp}$/ || File.exist?( File.join( @settings[:sites_path], 'Swiftlyfolder', template[:name] ) ) )
+        if ( !template.nil? && ( template[:remote] =~ /^#{URI::regexp}$/ || File.exist?( File.join( @settings[:sites_path], 'Swiftlyfolder', template[:name] ) ) ) )
 
             return template
         end

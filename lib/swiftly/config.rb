@@ -3,110 +3,110 @@ require 'swiftly/version'
 require 'swiftly/app_module'
 
 module Swiftly
-	class Config < Thor
+  class Config < Thor
 
-		include Helpers
+    include Helpers
 
-		no_commands do
+    no_commands do
 
-			def self.global_file
-				File.join(
-					Dir.home,
-					".#{APP_NAME}"
-				) unless !File.exists? File.join(
-					Dir.home,
-					".#{APP_NAME}"
-				)
+      def self.global_file
+        File.join(
+          Dir.home,
+          ".#{APP_NAME}"
+        ) unless !File.exists? File.join(
+          Dir.home,
+          ".#{APP_NAME}"
+        )
 
-			end
+      end
 
-			def self.project_file project_name
+      def self.project_file project_name
 
-				global_config = self.load :global, project_name
+        global_config = self.load :global, project_name
 
-				File.join(
-					global_config[:sites_path],
-					project_name, 'config', 'config.yml'
-				) unless !File.exists? File.join(
-					global_config[:sites_path],
-					project_name, 'config', 'config.yml'
-				)
+        File.join(
+          global_config[:sites_path],
+          project_name, 'config', 'config.yml'
+        ) unless !File.exists? File.join(
+          global_config[:sites_path],
+          project_name, 'config', 'config.yml'
+        )
 
-			end
+      end
 
-			def self.wp_config_file project_name
+      def self.wp_config_file project_name
 
-				global_config = self.load :global, project_name
+        global_config = self.load :global, project_name
 
-				File.join(
-					global_config[:sites_path],
-					project_name,
-					"wp-config.php"
-				) unless !File.exists? File.join(
-					global_config[:sites_path],
-					project_name,
-					"wp-config.php"
-				)
+        File.join(
+          global_config[:sites_path],
+          project_name,
+          "wp-config.php"
+        ) unless !File.exists? File.join(
+          global_config[:sites_path],
+          project_name,
+          "wp-config.php"
+        )
 
-			end
+      end
 
-			def self.load file, project_name = nil
+      def self.load file, project_name = nil
 
-				case file
-				when :wp_config
+        case file
+        when :wp_config
 
-					if wp_config_file( project_name )
+          if wp_config_file( project_name )
 
-						# load the wp-config file environment settings for wp-enabled environments
-						wp_local = File.read(
-							wp_config_file(
-								project_name
-							)
-						)[/\$local\s*?=[\s|\S]*?({[\s|\S]*?})/, 1]
+            # load the wp-config file environment settings for wp-enabled environments
+            wp_local = File.read(
+              wp_config_file(
+                project_name
+              )
+            )[/\$local\s*?=[\s|\S]*?({[\s|\S]*?})/, 1]
 
-						wp_staging = File.read(
-							wp_config_file(
-								project_name
-							)
-						)[/\$staging\s*?=[\s|\S]*?({[\s|\S]*?})/, 1]
+            wp_staging = File.read(
+              wp_config_file(
+                project_name
+              )
+            )[/\$staging\s*?=[\s|\S]*?({[\s|\S]*?})/, 1]
 
-						wp_production = File.read(
-							wp_config_file(
-								project_name
-							)
-						)[/\$production\s*?=[\s|\S]*?({[\s|\S]*?})/, 1]
+            wp_production = File.read(
+              wp_config_file(
+                project_name
+              )
+            )[/\$production\s*?=[\s|\S]*?({[\s|\S]*?})/, 1]
 
-						if wp_local.nil? || wp_staging.nil? || wp_production.nil?
+            if wp_local.nil? || wp_staging.nil? || wp_production.nil?
 
-							return {
-								local: {},
- 								staging: {},
-								production: {}
-							}
+              return {
+                local: {},
+                staging: {},
+                production: {}
+              }
 
-						end
+            end
 
-						load_hash = {
-							local:       JSON.parse(wp_local).inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
-							staging:     JSON.parse(wp_staging).inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
-							production:  JSON.parse(wp_production).inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
-						}
+            load_hash = {
+              local:       JSON.parse(wp_local).inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
+              staging:     JSON.parse(wp_staging).inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
+              production:  JSON.parse(wp_production).inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+            }
 
-					end
+          end
 
-				when :project
+        when :project
 
-					load_hash = YAML.load_file( project_file( project_name ) )
+          load_hash = YAML.load_file( project_file( project_name ) )
 
-				when :global
+        when :global
 
-					load_hash = YAML.load_file( global_file )
+          load_hash = YAML.load_file( global_file )
 
-				end
+        end
 
-				 load_hash
+         load_hash
 
-			end
-		end
-	end
+      end
+    end
+  end
 end

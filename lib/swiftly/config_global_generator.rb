@@ -2,37 +2,37 @@ require "swiftly/version"
 require "thor/group"
 
 module Swiftly
-	class ConfigGlobalGenerator < Thor::Group
+  class ConfigGlobalGenerator < Thor::Group
 
-		include Thor::Actions
+    include Thor::Actions
 
     argument :sites_path
     argument :db_host
     argument :db_user
     argument :db_pass
 
-		desc "Handles the creation of the config file."
+    desc "Handles the creation of the config file."
 
-		def self.source_root
-			File.dirname(__FILE__)
-		end
+    def self.source_root
+      File.dirname(__FILE__)
+    end
 
-		def create
+    def create
 
-			@version = VERSION
+      @version = VERSION
 
-			template(
-				File.join(
-					'templates',
-					'config_global.erb'
-				),
-				File.join(
-					Dir.home,
-					APP_NAME
-				),
-				:verbose => false
-			)
+      template(
+        File.join(
+          'templates',
+          'config_global.erb'
+        ),
+        File.join(
+          Dir.home,
+          ".#{APP_NAME}"
+        ),
+        :verbose => false
+      )
 
-		end
-	end
+    end
+  end
 end

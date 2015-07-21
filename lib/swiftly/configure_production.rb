@@ -3,40 +3,40 @@ require 'swiftly/app_module'
 require 'swiftly/configure'
 
 module Swiftly
-	class Production < Thor
+  class Production < Thor
 
-		include Helpers
+    include Helpers
 
-		desc "configure production domain", "Configure production domain"
+    desc "configure production domain", "Configure production domain"
 
-		def domain( value = false )
+    def domain( value = false )
 
-			update_setting_dialog( :production, :domain, value )
+      update_setting_dialog( :production, :domain, value )
 
-		end
+    end
 
-		desc "configure production host", "Configure production hostname"
+    desc "configure production host", "Configure production hostname"
 
-		def host( value = false )
+    def host( value = false )
 
-			update_setting_dialog( :production, :db_host, value )
+      update_setting_dialog( :production, :db_host, value )
 
-		end
+    end
 
-		desc "configure production username", "Configure production database username"
+    desc "configure production username", "Configure production database username"
 
-		def username( value = false )
+    def username( value = false )
 
-			update_setting_dialog( :production, :db_user, value )
+      update_setting_dialog( :production, :db_user, value )
 
-		end
+    end
 
-		desc "configure production password", "Configure production database password"
+    desc "configure production password", "Configure production database password"
 
-		def password( value = false )
+    def password( value = false )
 
-			update_setting_dialog( :production, :db_pass, value )
+      update_setting_dialog( :production, :db_pass, value )
 
-		end
-	end
+    end
+  end
 end
