@@ -12,7 +12,7 @@ module Swiftly
 
     include Helpers
 
-    desc "create project PROJECT_NAME", "Create a create project"
+    desc "create project PROJECT_NAME", "Create an empty project"
 
     def project( project_name )
 
@@ -28,7 +28,7 @@ module Swiftly
 
     end
 
-    desc "create git PROJECT_NAME", "Create a create git enabled project"
+    desc "create git PROJECT_NAME", "Create an empty (git enabled) project"
 
     def git( project_name )
 
@@ -50,7 +50,7 @@ module Swiftly
 
     end
 
-    desc "create git PROJECT_NAME", "Create a create wordpress (git enabled) project"
+    desc "create wordpress PROJECT_NAME", "Create a wordpress (git enabled) project"
     method_option :template, aliases: '-t', type: :string, default: :default, desc: 'Provide the name of the template to use'
 
 

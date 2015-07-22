@@ -20,7 +20,7 @@ module Swiftly
     include Thor::Actions
     include Helpers
 
-    register Swiftly::Create,    "create",    "Create COMMAND PROJECT_NAME",           "Create projects by passing a project name"
+    register Swiftly::Create,    "create",    "create COMMAND PROJECT_NAME",           "Create projects by passing a project name"
     register Swiftly::Configure, "configure", "configure COMMAND",                     "Configure settings"
     register Swiftly::Setup,     "setup",     "setup COMMAND PROJECT_NAME",            "Setup [environment] on server"
     register Swiftly::Push,      "push",      "push COMMAND PROJECT_NAME",             "Push [environment] database and files to server"
