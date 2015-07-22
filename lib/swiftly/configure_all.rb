@@ -17,10 +17,14 @@ module Swiftly
 
       say_status "#{APP_NAME}:", "Thanks for trying out #{APP_NAME}. Lets get started!", :green
 
-      current = Swiftly::Config.load( :global )
+      current = Swiftly::Config.load :global
+
       global_settings = {
         version: VERSION,
         sites_path: current[:sites_path].nil? ? 'not set' : current[:sites_path],
+      }
+
+     swiftly_settings = {
         local: {
           db_host: current[:local][:db_host].nil? ? 'not set' : current[:local][:db_host],
           db_user: current[:local][:db_user].nil? ? 'not set' : current[:local][:db_user],
@@ -42,16 +46,16 @@ module Swiftly
 
       questions = {
         sites_path:               "\n\n--> What is the absolute path to the folder \n\s\s\s\swhere you keep all of your sites? Currently: (\e[0;m#{global_settings[:sites_path]}\e[33;m):",
-        local_db_host:            "\n--> What is your local hostname? Currently: (\e[0;m#{global_settings[:local][:db_host]}\e[33;m):",
-        local_db_user:            "\n--> What is your local mysql username? Currently: (\e[0;m#{global_settings[:local][:db_user]}\e[33;m):",
+        local_db_host:            "\n--> What is your local hostname? Currently: (\e[0;m#{swiftly_settings[:local][:db_host]}\e[33;m):",
+        local_db_user:            "\n--> What is your local mysql username? Currently: (\e[0;m#{swiftly_settings[:local][:db_user]}\e[33;m):",
         local_db_pass:            "\n--> What is your local mysql password?",
-        staging_server_domain:    "\n--> What is your staging server domain? Currently: (\e[0;m#{global_settings[:staging][:domain]}\e[33;m):",
-        staging_db_host:          "\n--> What is your staging server hostname? Currently: (\e[0;m#{global_settings[:staging][:db_host]}\e[33;m):",
-        staging_db_user:          "\n--> What is your staging server mysql username? Currently: (\e[0;m#{global_settings[:staging][:db_user]}\e[33;m):",
+        staging_server_domain:    "\n--> What is your staging server domain? Currently: (\e[0;m#{swiftly_settings[:staging][:domain]}\e[33;m):",
+        staging_db_host:          "\n--> What is your staging server hostname? Currently: (\e[0;m#{swiftly_settings[:staging][:db_host]}\e[33;m):",
+        staging_db_user:          "\n--> What is your staging server mysql username? Currently: (\e[0;m#{swiftly_settings[:staging][:db_user]}\e[33;m):",
         staging_db_pass:          "\n--> What is your staging server mysql password?",
-        production_server_domain: "\n--> What is your production server domain? Currently: (\e[0;m#{global_settings[:production][:domain]}\e[33;m):",
-        production_db_host:       "\n--> What is your production server hostname? Currently: (\e[0;m#{global_settings[:production][:db_host]}\e[33;m):",
-        production_db_user:       "\n--> What is your production server mysql username? Currently: (\e[0;m#{global_settings[:production][:db_user]}\e[33;m):",
+        production_server_domain: "\n--> What is your production server domain? Currently: (\e[0;m#{swiftly_settings[:production][:domain]}\e[33;m):",
+        production_db_host:       "\n--> What is your production server hostname? Currently: (\e[0;m#{swiftly_settings[:production][:db_host]}\e[33;m):",
+        production_db_user:       "\n--> What is your production server mysql username? Currently: (\e[0;m#{swiftly_settings[:production][:db_user]}\e[33;m):",
         production_db_pass:       "\n--> What is your production server mysql password?"
       }
 
@@ -156,7 +160,7 @@ module Swiftly
 
           end
 
-          global_settings[environment][setting.to_sym] = answer
+          swiftly_settings[environment][setting.to_sym] = answer
 
         end
 
@@ -166,7 +170,7 @@ module Swiftly
 
       File.open(Swiftly::Config.global_file,'w') do |h|
 
-         h.write global_settings.to_yaml
+         h.write swiftly_settings.to_yaml
 
       end
     end

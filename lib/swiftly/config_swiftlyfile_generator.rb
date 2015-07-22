@@ -5,6 +5,10 @@ module Swiftly
 
     include Thor::Actions
 
+    argument :db_host
+    argument :db_user
+    argument :db_pass
+
     desc "Handles the creation of the _templates file."
 
     def self.source_root
@@ -13,7 +17,7 @@ module Swiftly
 
     def create
 
-      settings = Swiftly::Config.load( :global )
+      settings = Swiftly::Config.load :global
 
       template(
         File.join(

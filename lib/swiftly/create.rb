@@ -32,7 +32,7 @@ module Swiftly
 
     def git( project_name )
 
-      settings = Swiftly::Config.load( :global )
+      settings = Swiftly::Config.load :global
 
       project_path = File.join(
         settings[:sites_path],
@@ -56,7 +56,8 @@ module Swiftly
 
     def wordpress project_name
 
-      settings = Swiftly::Config.load :global
+      global_settings  = Swiftly::Config.load :global
+      project_settings = Swiftly::Config.load :swiftly
 
       template = Swiftly::Packages.load({
         framework: :wordpress,
@@ -65,7 +66,7 @@ module Swiftly
       })
 
       project_path = File.join(
-        settings[:sites_path],
+        global_settings[:sites_path],
         project_name
       )
 
@@ -77,7 +78,7 @@ module Swiftly
       CreateWordpress.new([
         project_name,
         template,
-        settings,
+        project_settings,
         project_path
       ]).invoke_all
 

@@ -205,10 +205,10 @@ module Swiftly
 
     def update_setting environment, setting, value
 
-      config                       = Swiftly::Config.load( :global )
+      config                       = Swiftly::Config.load :swiftly
       config[environment][setting] = value
 
-      File.open(Swiftly::Config.global_file,'w') do |h|
+      File.open(Swiftly::Config.swiftlyfile,'w') do |h|
 
          h.write config.to_yaml
 
@@ -226,7 +226,8 @@ module Swiftly
 
       say # spacer
 
-      current_setting = Swiftly::Config.load( :global )[environment][setting]
+      swiftly_setting = Swiftly::Config.load :swiftly
+      current_setting = swiftly[environment][setting]
       current_value   = current_setting.nil? ? 'nothing' : current_setting
 
       say_status "#{APP_NAME}:", "The staging #{nouns[setting]} is currently set to #{current_value}.", :yellow
@@ -239,7 +240,8 @@ module Swiftly
 
           update_setting environment, setting, value
 
-          new_setting = Swiftly::Config.load( :global )[environment][setting]
+          new_swiftly_setting = Swiftly::Config.load :swiftly
+          new_setting         = new_swiftly_setting[environment][setting]
 
           say # spacer
 
@@ -261,7 +263,8 @@ module Swiftly
 
           update_setting environment, setting, value
 
-          new_setting = Swiftly::Config.load( :global )[environment][setting]
+          new_swiftly_setting = Swiftly::Config.load :swiftly
+          new_setting         = new_swiftly_setting[environment][setting]
 
           say # spacer
 
@@ -289,9 +292,15 @@ module Swiftly
     end
 
     # php escapes:
-    # "\\" #Backslash, '"' Double quotes,    "\'" Single quotes, "\a" Bell/alert,
-    # "\b" Backspace,  "\r" Carriage Return, "\n" New Line,      "\s" Space,      "\t" Tab
-
+    # "\\" #Backslash,
+    # '"'  Double quotes,
+    # "\'" Single quotes,
+    # "\a" Bell/alert,
+    # "\b" Backspace,
+    # "\r" Carriage Return,
+    # "\n" New Line,
+    # "\s" Space,
+    # "\t" Tab
     def fix_text string
 
       pattern     = /(s\s*:\s*)(\d+)((\s*:\\*["&])(.*?)(\\?\"\s*;))/

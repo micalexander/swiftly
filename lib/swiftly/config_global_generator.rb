@@ -7,9 +7,6 @@ module Swiftly
     include Thor::Actions
 
     argument :sites_path
-    argument :db_host
-    argument :db_user
-    argument :db_pass
 
     desc "Handles the creation of the config file."
 

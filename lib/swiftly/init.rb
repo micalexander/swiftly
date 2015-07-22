@@ -112,11 +112,15 @@ module Swiftly
 
       end
 
-      Swiftly::ConfigGlobalGenerator.new(
-        settings
-      ).invoke_all
+      Swiftly::ConfigGlobalGenerator.new([
+        settings[0]
+      ]).invoke_all
 
-      ConfigSwiftlyfileGenerator.new.invoke_all
+      ConfigSwiftlyfileGenerator.new([
+        settings[1],
+        settings[2],
+        settings[3]
+      ]).invoke_all
 
     end
 

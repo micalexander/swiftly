@@ -10,12 +10,27 @@ module Swiftly
     no_commands do
 
       def self.global_file
+
         File.join(
           Dir.home,
           ".#{APP_NAME}"
         ) unless !File.exists? File.join(
           Dir.home,
           ".#{APP_NAME}"
+        )
+
+      end
+
+      def self.swiftlyfile
+
+        global_config = self.load :global
+
+        File.join(
+          global_config[:sites_path],
+          "#{APP_NAME}file".capitalize
+        ) unless !File.exists? File.join(
+          global_config[:sites_path],
+          "#{APP_NAME}file".capitalize
         )
 
       end
@@ -97,6 +112,10 @@ module Swiftly
         when :project
 
           load_hash = YAML.load_file( project_file( project_name ) )
+
+        when :swiftly
+
+          load_hash = YAML.load_file( swiftlyfile )
 
         when :global
 

@@ -13,7 +13,7 @@ module Swiftly
 
       settings = Swiftly::Project.settings( project_name )
 
-      verifiy_mina_credentials :staging, settings, 'rollback to the'
+      verifiy_mina_credentials :staging, settings, 'ssh into the'
 
       mina 'ssh', :staging, project_name
 
@@ -25,7 +25,7 @@ module Swiftly
 
       settings = Swiftly::Project.settings( project_name )
 
-      verifiy_mina_credentials :production, settings, 'rollback to the'
+      verifiy_mina_credentials :production, settings, 'ssh into the'
 
       mina 'ssh', :production, project_name
 

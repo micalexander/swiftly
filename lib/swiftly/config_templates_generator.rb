@@ -13,7 +13,7 @@ module Swiftly
 
     def create
 
-      settings = Swiftly::Config.load( :global )
+      settings = Swiftly::Config.load :global
 
       template(
         File.join(

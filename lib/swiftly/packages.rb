@@ -1,10 +1,12 @@
 require "swiftly/config"
+require "swiftly/app_module"
 require "yaml"
 
 module Swiftly
   class Packages < Thor
 
     include Thor::Actions
+    include Helpers
 
     no_commands do
 
@@ -57,10 +59,11 @@ module Swiftly
         approved_package = nil
 
         if self.available &&
-          !self.available[package[:framework]].nil? &&
-          !self.available[package[:framework]][package[:type]].nil?
+          !self.available[:packages].nil? &&
+          !self.available[:packages][package[:framework]].nil? &&
+          !self.available[:packages][package[:framework]][package[:type]].nil?
 
-          self.available[package[:framework]][package[:type]].each do |p|
+          self.available[:packages][package[:framework]][package[:type]].each do |p|
 
             if ( p[:name] == package[:name] && p[:status] != :disabled ) ||
                ( p[:status] == :default )
@@ -75,6 +78,7 @@ module Swiftly
           end
 
         elsif !self.available
+
 
           approved_package = self.template
 
@@ -99,10 +103,11 @@ module Swiftly
         plugins = []
 
         if self.available &&
-          !self.available[framework].nil? &&
-          !self.available[framework][:plugins].nil?
+          !self.available[:packages].nil? &&
+          !self.available[:packages][framework].nil? &&
+          !self.available[:packages][framework][:plugins].nil?
 
-          self.available[framework][:plugins].each do |p|
+          self.available[:packages][framework][:plugins].each do |p|
 
             verified = self.load({
               framework: framework,

@@ -3,8 +3,13 @@
 APP_ROOT = File.expand_path("../../lib",__FILE__)
 $:.unshift( APP_ROOT )
 
+require 'yaml'
 require 'swiftly/cli'
 require 'swiftly/init'
 
-Swiftly::CLI.start  unless  !File.exist? File.join( Dir.home, ".swiftly" )
 Swiftly::Init.start unless File.exist? File.join( Dir.home, ".swiftly" )
+
+global_config = YAML.load_file File.join( Dir.home, ".swiftly" ) unless !File.exists? File.join( Dir.home, ".swiftly" )
+
+Swiftly::Init.start unless File.exist? File.join( global_config[:sites_path], "Swiftlyfile" )
+Swiftly::CLI.start  unless !File.exist? File.join( global_config[:sites_path], "Swiftlyfile" )
