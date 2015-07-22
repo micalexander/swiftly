@@ -94,8 +94,6 @@ module Swiftly
 
             unless type === :db_pass
 
-
-
               if responses.include? ask( "\n--> Got it! Is this correct? \e[32;m#{answer}\e[0;m [Y|n]")
 
                   confirm = true

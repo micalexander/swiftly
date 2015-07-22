@@ -215,65 +215,6 @@ module Swiftly
       end
     end
 
-    def update_setting_dialog( environment, setting, value )
-
-      nouns = {
-        domain:  'domain',
-        db_host: 'host',
-        db_user: 'username',
-        db_pass: 'password'
-      }
-
-      say # spacer
-
-      swiftly_setting = Swiftly::Config.load :swiftly
-      current_setting = swiftly[environment][setting]
-      current_value   = current_setting.nil? ? 'nothing' : current_setting
-
-      say_status "#{APP_NAME}:", "The staging #{nouns[setting]} is currently set to #{current_value}.", :yellow
-
-      say # spacer
-
-      if value
-
-        if yes? "Are you sure you want to set it to (#{value})? [Y|n]", :yellow
-
-          update_setting environment, setting, value
-
-          new_swiftly_setting = Swiftly::Config.load :swiftly
-          new_setting         = new_swiftly_setting[environment][setting]
-
-          say # spacer
-
-          say_status "#{APP_NAME}:", "Change successful! The value is set to #{new_setting}"
-
-        end
-
-      else
-
-        value = ask "\n--> What would you like to set it to?", :yellow
-
-        say # spacer
-
-        if value == ""
-
-          say_status "#{APP_NAME}:", "Change unsuccessful, #{nouns[setting]} is still set to #{current_value}", :yellow
-
-        else
-
-          update_setting environment, setting, value
-
-          new_swiftly_setting = Swiftly::Config.load :swiftly
-          new_setting         = new_swiftly_setting[environment][setting]
-
-          say # spacer
-
-          say_status "#{APP_NAME}:", "Change successful! #{nouns[setting]} is now set to #{new_setting}"
-
-        end
-      end
-    end
-
     def fix_serialization file
 
       Encoding.default_external = Encoding::UTF_8
