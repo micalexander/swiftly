@@ -108,7 +108,7 @@ module Swiftly
 
         end
 
-        say_status "\n\s\s\s\sThats it!", "You can now run `#{APP_NAME} help` for more options."
+        say_status "\n\s\s\s\sThats it!", "You can now run [#{APP_NAME} help] for more options."
 
       end
 
