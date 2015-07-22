@@ -54,19 +54,15 @@ module Swiftly
     method_option :template, aliases: '-t', type: :string, default: :default, desc: 'Provide the name of the template to use'
 
 
-    def wordpress( project_name )
+    def wordpress project_name
 
-      settings = Swiftly::Config.load( :global )
+      settings = Swiftly::Config.load :global
 
-      if ( options[:template] == :default )
-
-        template = Swiftly::AddOn.load_default_template framework: :wordpress, type: :template
-
-      else
-
-        template = Swiftly::AddOn.load framework: :wordpress, type: :template, name: options[:template]
-
-      end
+      template = Swiftly::Packages.load({
+        framework: :wordpress,
+        type:      :template,
+        name:      options[:template]
+      })
 
       project_path = File.join(
         settings[:sites_path],

@@ -20,7 +20,9 @@ module Swiftly
 
         say_status "#{APP_NAME}:", "There is already a zip file named [#{project_name}.zip]. \n\n", :red
 
-        unless yes? set_color "Do you want to overwrite it? [Y/n]", :yellow
+        responses = ['y','Y','']
+
+        unless responses.include? ask set_color "Do you want to overwrite it? [Y/n]", :yellow
 
           say #spacer
           say_status "#{APP_NAME}:", "No changes were made. Please remove [#{project_name}.zip] before running destroy again.\n\n", :yellow

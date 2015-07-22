@@ -1,7 +1,7 @@
 require "thor/group"
 require 'rubygems'
 require 'active_support'
-require 'swiftly/add_on'
+require 'swiftly/packages'
 require 'swiftly/app_module'
 require 'active_support/core_ext/string'
 require 'git'
@@ -46,9 +46,9 @@ module Swiftly
 
         inside File.join( 'wp-content', 'themes') do
 
-          if @template[:remote] =~ /^#{URI::regexp}$/
+          if @template[:location] =~ /^#{URI::regexp}\.zip$/
 
-            zipfile = get @template[:remote], File.basename( @template[:remote] )
+            zipfile = get @template[:location], File.basename( @template[:location] )
 
             unzip zipfile, @template[:name] unless File.exist? @template[:name]
 
@@ -56,7 +56,7 @@ module Swiftly
 
           else
 
-            FileUtils.cp_r( File.join( @settings[:sites_path], "#{APP_NAME}folder", 'templates', @template[:name] ), '.' )
+            FileUtils.cp_r( File.join( @template[:location], @template[:name] ), '.' )
 
           end
 
@@ -121,17 +121,26 @@ module Swiftly
 
         inside File.join( "wp-content", "plugins" ) do
 
-          plugins = Swiftly::AddOn.load framework: :wordpress, type: :plugins
+          plugins = Swiftly::Packages.load_plugins :wordpress
 
-          if plugins.count > 0
+          if plugins
 
             # grab global plugins if they exist
-            plugins.each do |directory, plugin|
+            plugins.each do |plugin|
 
-              plugin_dir = File.join( @settings[:sites_path], "#{APP_NAME}folder",'plugins', directory)
+              if plugin[:location] =~ /^#{URI::regexp}\.zip$/
 
-              FileUtils.cp_r( plugin_dir, '.' ) unless File.exist? File.join( ".", directory )
+                zipfile = get plugin[:location], File.basename( plugin[:location] )
 
+                unzip zipfile, plugin[:name] unless File.exist? plugin[:name]
+
+                remove_file zipfile unless !File.exist? zipfile
+
+              else
+
+                FileUtils.cp_r( File.join( plugin[:location], plugin[:name] ), '.' ) unless File.exist? plugin[:name]
+
+              end
             end
           end
         end
@@ -143,17 +152,23 @@ module Swiftly
 
         gsub_file 'wp-config.php', /\/\/\s*Insert_Salts_Below/, Net::HTTP.get('api.wordpress.org', '/secret-key/1.1/salt')
         gsub_file 'wp-config.php', /(table_prefix\s*=\s*')(wp_')/, '\1' + @project_name[0,3] + "_'"
-        gsub_file 'wp-config.php', /(\$local\s*?=[\s|\S]*?)({[\s|\S]*?})/  do |match|
 
-          '$local = \'{
-        "db_name": "' + @project_name + '_local_wp",
-        "db_host": "' + @settings[:local][:db_host] + '",
-        "db_user": "' + @settings[:local][:db_user] + '",
-        "db_pass": "' + @settings[:local][:db_pass] + '",
-        "domain":  "http://' + @project_name + '.dev",
-        "wp_home": "http://' + @project_name + '.dev"
-      }'
+        if !@settings[:local][:db_host].nil? &&
+           !@settings[:local][:db_user].nil? &&
+           !@settings[:local][:db_pass].nil?
 
+          gsub_file 'wp-config.php', /(\$local\s*?=[\s|\S]*?)({[\s|\S]*?})/  do |match|
+
+            '$local = \'{
+          "db_name": "' + @project_name + '_local_wp",
+          "db_host": "' + @settings[:local][:db_host] + '",
+          "db_user": "' + @settings[:local][:db_user] + '",
+          "db_pass": "' + @settings[:local][:db_pass] + '",
+          "domain":  "http://' + @project_name + '.dev",
+          "wp_home": "http://' + @project_name + '.dev"
+        }'
+
+          end
         end
 
         database = Swiftly::Database.new( @project_name )

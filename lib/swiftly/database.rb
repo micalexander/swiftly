@@ -21,22 +21,38 @@ module Swiftly
 
       def verify_db_credentials( environment, verbage )
 
-        say #spacer
-        say_status "#{APP_NAME}:", "Could not #{verbage} #{environment} database, because your credentials are not set.", :red if @settings[environment][:db_user].nil?
+        if @settings[environment][:db_user].nil?
 
-        say #spacer
-        say_status "#{APP_NAME}:", "Could not #{verbage} #{environment} database, because your credentials are not set.", :red if @settings[environment][:db_host].nil?
+          say #spacer
+          say_status "#{APP_NAME}:", "Could not #{verbage} #{environment} database, because your credentials are not set.", :red
 
-        say #spacer
-        say_status "#{APP_NAME}:", "Could not #{verbage} #{environment} database, because your credentials are not set.", :red if @settings[environment][:db_pass].nil?
+        end
 
-        say #spacer
-        say_status "#{APP_NAME}:", "Could not #{verbage} #{environment} database, because your credentials are not set.", :red if @settings[environment][:db_name].nil?
+        if @settings[environment][:db_host].nil?
+
+          say #spacer
+          say_status "#{APP_NAME}:", "Could not #{verbage} #{environment} database, because your credentials are not set.", :red
+
+        end
+
+        if @settings[environment][:db_pass].nil?
+
+          say #spacer
+          say_status "#{APP_NAME}:", "Could not #{verbage} #{environment} database, because your credentials are not set.", :red
+
+        end
+
+        if @settings[environment][:db_name].nil?
+
+          say #spacer
+          say_status "#{APP_NAME}:", "Could not #{verbage} #{environment} database, because your credentials are not set.", :red
+
+        end
 
         abort if @settings[environment][:db_user].nil?
-        abort if @settings[environment][:db_user].nil?
-        abort if @settings[environment][:db_user].nil?
-        abort if @settings[environment][:db_user].nil?
+        abort if @settings[environment][:db_host].nil?
+        abort if @settings[environment][:db_pass].nil?
+        abort if @settings[environment][:db_name].nil?
 
       end
 
