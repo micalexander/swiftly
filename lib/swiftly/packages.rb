@@ -1,14 +1,20 @@
 require "swiftly/config"
 require "swiftly/app_module"
 require "yaml"
+require "swiftly/factory"
 
 module Swiftly
-  class Packages < Thor
+  class Package < Thor
 
     include Thor::Actions
     include Helpers
 
     no_commands do
+
+      attr_accessor :framework
+      attr_accessor :type
+      attr_accessor :name
+      attr_accessor :location
 
       def self.file
 
@@ -41,7 +47,21 @@ module Swiftly
 
       def self.available
 
-        YAML.load_file self.file
+        eval( IO.read( self.file ) )
+
+        load_hash = Resolver.get( :package ) == {} ? false : Resolver.get( :package )
+
+      end
+
+      def self.set setting, *args, &block
+
+        Swiftly::Smokestack.define do
+
+          factory setting, &block
+
+        end
+
+        Swiftly::Resolver.load setting, args[0][:type], Swiftly::Smokestack.build( setting )
 
       end
 

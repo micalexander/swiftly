@@ -59,7 +59,7 @@ module Swiftly
       global_settings  = Swiftly::Config.load :global
       project_settings = Swiftly::Config.load :swiftly
 
-      template = Swiftly::Packages.load({
+      template = Swiftly::Package.load({
         framework: :wordpress,
         type:      :template,
         name:      options[:template]
@@ -78,7 +78,6 @@ module Swiftly
       CreateWordpress.new([
         project_name,
         template,
-        project_settings,
         project_path
       ]).invoke_all
 

@@ -170,7 +170,7 @@ module Swiftly
             -h'#{@settings[environment][:db_host]}' \
             -p'#{@settings[environment][:db_pass]}' \
             -Bse"CREATE DATABASE IF NOT EXISTS \
-            #{@settings[environment][:db_name]}"
+            #{@settings[environment][:db_name].gsub(/\-|\./, '_')}"
           EOF
 
           swiftly_shell cmd

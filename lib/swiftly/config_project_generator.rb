@@ -23,7 +23,7 @@ module Swiftly
         File.join(
           project_path,
           'config',
-          'config.yml'
+          'config.rb'
         )
       )
 

@@ -10,69 +10,40 @@ module Swiftly
 
     no_commands do
 
-      def self.settings( project_name )
+      def self.set setting, *args, &block
 
-        project_name   = self.get_project project_name
-        global_config  = Swiftly::Config.load :global
-        swiftly_config = Swiftly::Config.load :swiftly
-        project_config = Swiftly::Config.load :project,   project_name
-        wp_config      = Swiftly::Config.load :wp_config, project_name
+        Swiftly::Smokestack.define do
 
-        global_config  = {
-          version:    VERSION,
-          sites_path: global_config[:sites_path],
-        }
+          factory setting, &block
 
-        switly_config  = {
-          staging: {
-            domain:  defined?(project_config[:staging][:domain])  ? project_config[:staging][:domain]  : global_config[:staging][:domain],
-            db_host: defined?(project_config[:staging][:db_host]) ? project_config[:staging][:db_host] : global_config[:staging][:db_host],
-            db_user: defined?(project_config[:staging][:db_user]) ? project_config[:staging][:db_user] : global_config[:staging][:db_user],
-            db_pass: defined?(project_config[:staging][:db_pass]) ? project_config[:staging][:db_pass] : global_config[:staging][:db_pass],
-          },
-          production: {
-            domain:  defined?(project_config[:production][:domain])  ? project_config[:production][:domain]  : global_config[:production][:domain],
-            db_host: defined?(project_config[:production][:db_host]) ? project_config[:production][:db_host] : global_config[:production][:db_host],
-            db_user: defined?(project_config[:production][:db_user]) ? project_config[:production][:db_user] : global_config[:production][:db_user],
-            db_pass: defined?(project_config[:production][:db_pass]) ? project_config[:production][:db_pass] : global_config[:production][:db_pass],
-          }
-        }.merge! local: global_config[:local]
+        end
 
-        settings = {
-          project: {
-            name: project_name,
-            path: File.join( global_config[:sites_path], project_name ),
-            dump: File.join( global_config[:sites_path], project_name, '_backups', 'dumps' )
-          },
-          local: {
-            domain:  defined?(wp_config[:local][:domain])  ? wp_config[:local][:domain]  : project_config[:local][:domain],
-            db_name: defined?(wp_config[:local][:db_name]) ? wp_config[:local][:db_name] : project_config[:local][:db_name],
-            db_host: defined?(wp_config[:local][:db_host]) ? wp_config[:local][:db_host] : switly_config[:local][:db_host],
-            db_user: defined?(wp_config[:local][:db_user]) ? wp_config[:local][:db_user] : switly_config[:local][:db_user],
-            db_pass: defined?(wp_config[:local][:db_pass]) ? wp_config[:local][:db_pass] : switly_config[:local][:db_pass],
-          },
-          staging: {
-            db_name:  defined?(wp_config[:staging][:db_name])    ? wp_config[:staging][:db_name] : project_config[:staging][:db_name],
-            db_host:  defined?(wp_config[:staging][:db_host])    ? wp_config[:staging][:db_host] : switly_config[:staging][:db_host],
-            db_user:  defined?(wp_config[:staging][:db_user])    ? wp_config[:staging][:db_user] : switly_config[:staging][:db_user],
-            db_pass:  defined?(wp_config[:staging][:db_pass])    ? wp_config[:staging][:db_pass] : switly_config[:staging][:db_pass],
-            domain:   defined?(switly_config[:staging][:domain]) ? switly_config[:staging][:domain]  : wp_config[:staging][:domain],
-            repo:     project_config[:staging][:repo],
-            branch:   project_config[:staging][:branch],
-            ssh_path: project_config[:staging][:ssh_path],
-            ssh_user: project_config[:staging][:ssh_user],
-          },
-          production: {
-            db_name:  defined?(wp_config[:production][:db_name])    ? wp_config[:production][:db_name] : project_config[:production][:db_name],
-            db_host:  defined?(wp_config[:production][:db_host])    ? wp_config[:production][:db_host] : switly_config[:production][:db_host],
-            db_user:  defined?(wp_config[:production][:db_user])    ? wp_config[:production][:db_user] : switly_config[:production][:db_user],
-            db_pass:  defined?(wp_config[:production][:db_pass])    ? wp_config[:production][:db_pass] : switly_config[:production][:db_pass],
-            domain:   defined?(switly_config[:production][:domain]) ? switly_config[:production][:domain]  : wp_config[:production][:domain],
-            repo:     project_config[:production][:repo],
-            branch:   project_config[:production][:branch],
-            ssh_path: project_config[:production][:ssh_path],
-            ssh_user: project_config[:production][:ssh_user],
-          }
+        Swiftly::Resolver.load setting, args[0][:type], Swiftly::Smokestack.build( setting )
+
+      end
+
+      def self.settings project_name = nil
+
+        project_name    = self.get_project project_name
+        global_config   = Swiftly::Config.load :global
+        swiftlyfile     = Swiftly::Config.swiftlyfile
+        project_file    = Swiftly::Config.project_file project_name
+        wp_config       = Swiftly::Config.wp_config_file project_name
+
+        eval( IO.read( swiftlyfile ) ) unless eval( IO.read( swiftlyfile ) ).nil?
+
+        wp_config_parse wp_config
+
+        eval( IO.read( project_file ) ) unless eval( IO.read( project_file ) ).nil?
+
+        settings = Resolver.get :server
+
+        settings[:global] = global_config
+
+        settings[:project] = {
+          name: project_name,
+          path: File.join( global_config[:sites_path], project_name ),
+          dump: File.join( global_config[:sites_path], project_name, '_backups', 'dumps' )
         }
 
         if defined?( settings[:staging][:ssh_user] ) &&
@@ -97,6 +68,76 @@ module Swiftly
 
       end
 
+      def self.wp_config_parse file
+
+        if file
+
+          # load the wp-config file environment settings for wp-enabled environments
+          wp_local = File.read( file )[/\$local\s*?=[\s|\S]*?({[\s|\S]*?})/, 1]
+
+          wp_staging = File.read( file )[/\$staging\s*?=[\s|\S]*?({[\s|\S]*?})/, 1]
+
+          wp_production = File.read( file )[/\$production\s*?=[\s|\S]*?({[\s|\S]*?})/, 1]
+
+          if wp_local.nil? || wp_staging.nil? || wp_production.nil?
+
+            return {
+              local: {},
+              staging: {},
+              production: {}
+            }
+
+          end
+
+          hash = {
+            local:       JSON.parse(wp_local).inject({}){|memo,(k,v)| memo[k] = v; memo},
+            staging:     JSON.parse(wp_staging).inject({}){|memo,(k,v)| memo[k] = v; memo},
+            production:  JSON.parse(wp_production).inject({}){|memo,(k,v)| memo[k] = v; memo}
+          }
+
+          hash.each do |k, v|
+
+            set :server, :type => k do
+
+              v.each do |setting, value|
+
+                if setting != 'wp_home'
+
+                  case setting
+                    when 'domain'
+                      domain value
+
+                    when 'repo'
+                      repo value
+
+                    when 'branch'
+                      branch value
+
+                    when 'ssh_path'
+                      ssh_path value
+
+                    when 'ssh_user'
+                      ssh_user value
+
+                    when 'db_name'
+                      db_name value
+
+                    when 'db_host'
+                      db_host value
+
+                    when 'db_user'
+                      db_user value
+
+                    when 'db_pass'
+                      db_pass value
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+
       def self.get_project( project_name )
 
         pathname     = Pathname.new project_name
@@ -110,7 +151,7 @@ module Swiftly
         thor.say_status( "#{APP_NAME}:", "#{project_path} is not a project.\n", :yellow ) &&
         abort unless File.directory?( project_path )
 
-        pathname.expand_path.basename
+        pathname.expand_path.basename.to_s
 
       end
 

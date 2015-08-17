@@ -12,6 +12,7 @@ module Swiftly
     def destroy( project_name )
 
       settings     = Swiftly::Project.settings project_name
+
       directory    = File.join( settings[:project][:path], '' )
       zipfile_name = settings[:project][:path] + '.zip'
 

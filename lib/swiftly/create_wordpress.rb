@@ -14,7 +14,7 @@ module Swiftly
 
     argument :project_name
     argument :template
-    argument :settings
+    # argument :settings
     argument :project_path
 
     desc "Handles the creation of a wordpress project."
@@ -121,7 +121,7 @@ module Swiftly
 
         inside File.join( "wp-content", "plugins" ) do
 
-          plugins = Swiftly::Packages.load_plugins :wordpress
+          plugins = Swiftly::Package.load_plugins :wordpress
 
           if plugins
 
@@ -153,17 +153,20 @@ module Swiftly
         gsub_file 'wp-config.php', /\/\/\s*Insert_Salts_Below/, Net::HTTP.get('api.wordpress.org', '/secret-key/1.1/salt')
         gsub_file 'wp-config.php', /(table_prefix\s*=\s*')(wp_')/, '\1' + @project_name[0,3] + "_'"
 
-        if !@settings[:local][:db_host].nil? &&
-           !@settings[:local][:db_user].nil? &&
-           !@settings[:local][:db_pass].nil?
+        settings = Swiftly::Config.load :swiftly
+
+        if !settings.nil? &&
+           !settings[:local][:db_host].nil? &&
+           !settings[:local][:db_user].nil? &&
+           !settings[:local][:db_pass].nil?
 
           gsub_file 'wp-config.php', /(\$local\s*?=[\s|\S]*?)({[\s|\S]*?})/  do |match|
 
             '$local = \'{
           "db_name": "' + @project_name + '_local_wp",
-          "db_host": "' + @settings[:local][:db_host] + '",
-          "db_user": "' + @settings[:local][:db_user] + '",
-          "db_pass": "' + @settings[:local][:db_pass] + '",
+          "db_host": "' + settings[:local][:db_host] + '",
+          "db_user": "' + settings[:local][:db_user] + '",
+          "db_pass": "' + settings[:local][:db_pass] + '",
           "domain":  "http://' + @project_name + '.dev",
           "wp_home": "http://' + @project_name + '.dev"
         }'
