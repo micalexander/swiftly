@@ -1,8 +1,0 @@
-# :wordpress:
-#  :template:
-#    - :name:
-#      :remote: https://github.com/micalexander/mask/archive/master.zip
-#      :status: :disabled
-#  :plugins:
-#    - advanced-custom-fields-pro/acf.php
-#    - ambrosite-body-class-enhanced/ambrosite-body-class.php
