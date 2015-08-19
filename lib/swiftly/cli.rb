@@ -9,7 +9,6 @@ require 'swiftly/ssh'
 require 'swiftly/clean'
 require 'swiftly/setup'
 require 'swiftly/rollback'
-require 'swiftly/generate'
 require 'swiftly/destroy'
 
 module Swiftly
@@ -25,7 +24,6 @@ module Swiftly
     register Swiftly::Rollback,  "rollback",  "rollback COMMAND PROJECT_NAME",         "Rollback the [environment] database and files on server"
     register Swiftly::SSH,       "ssh",       "ssh COMMAND PROJECT_NAME",              "SSH into the [environment] server and cd into site path"
     register Swiftly::Clean,     "clean",     "clean COMMAND PROJECT_NAME",            "Clean the [environment] releases on server"
-    register Swiftly::Generate,  "generate",  "generate POSTTYPE FILTER PROJECT_NAME", "Generate a custom post type"
     register Swiftly::Destroy,   "destroy",   "destroy PROJECT_NAME",                  "Destroy local project!"
 
   end
