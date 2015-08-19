@@ -1,4 +1,4 @@
-# Swiftly 5.0.0 (formaly known as Obi)
+# Swiftly 5.0.1 (formaly known as Obi)
 
 Swiftly is a web development project management tool.
 
