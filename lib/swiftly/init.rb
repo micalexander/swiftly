@@ -16,7 +16,7 @@ module Swiftly
 
       say # spacer
 
-      say "\t\t#{APP_NAME} #{VERSION} Development Manager\n\n", :blue
+      say "\t\t#{APP_NAME} #{VERSION} Web Development Project Manager\n\n", :blue
 
       say_status "#{APP_NAME}:", "Thanks for trying out #{APP_NAME}. Lets get started!", :green
 

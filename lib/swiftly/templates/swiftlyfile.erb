@@ -1,21 +1,23 @@
----
-:local:
-  :db_host: "<%= @db_host %>"
-  :db_user: "<%= @db_user %>"
-  :db_pass: "<%= @db_pass %>"
-:staging:
-  :domain:
-  :db_host:
-:production:
-  :domain:
-  :db_host:
-:packages:
-  :wordpress:
-    :template:
-    - :name: mask
-      :location: https://github.com/micalexander/mask/archive/master.zip
-      :status: :disabled
-    :plugins:
-    - :name: advanced-custom-fields-pro
-      :location: "/Users/username/plugins"
-      :status: :disabled
+set :server, :type => :local do
+
+  db_host '<%= @db_host %>'
+  db_user '<%= @db_user %>'
+  db_pass '<%= @db_pass %>'
+
+end
+
+# set :package, :type => :template do
+
+#   name     'mask'
+#   location 'https://github.com/micalexander/mask/archive/master.zip'
+#   status   :disabled
+
+# end
+
+# set :package, :type => :plugin do
+
+#   name     'advanced-custom-fields-pro'
+#   location '/Users/username/plugins'
+#   status   :disabled
+
+# end
