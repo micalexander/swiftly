@@ -32,11 +32,15 @@ module Swiftly
         project_file    = Swiftly::Config.project_file project_name
         wp_config       = Swiftly::Config.wp_config_file project_name
 
-        eval( IO.read( swiftlyfile ) ) unless eval( IO.read( swiftlyfile ) ).nil?
+        proc = Proc.new {}
+
+        eval( IO.read( swiftlyfile ) ) unless eval( IO.read( swiftlyfile ), proc.binding, swiftlyfile ).nil?
 
         wp_config_parse wp_config
 
-        eval( IO.read( project_file ) ) unless eval( IO.read( project_file ) ).nil?
+        proc = Proc.new {}
+
+        eval( IO.read( project_file ) ) unless eval( IO.read( project_file ), proc.binding, project_file ).nil?
 
         settings = Resolver.get :server
 

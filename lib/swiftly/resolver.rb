@@ -19,8 +19,6 @@ module Swiftly
       # that matches the setting param
       if !@@settings[setting].nil?
 
-
-
         # If so loop through
         @@settings[setting].each do |s|
 

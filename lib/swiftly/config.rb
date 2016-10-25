@@ -101,19 +101,15 @@ module Swiftly
 
         when :project
 
-          if !eval( IO.read( project_file( project_name ) ) ).nil?
+          eval( IO.read( project_file( project_name ) ) )
 
-            load_hash = Resolver.get :server == {} ? false : Resolver.get( :server )
-
-          end
+          load_hash = Resolver.get :server == {} ? false : Resolver.get( :server )
 
         when :swiftly
 
-          if !eval( IO.read( swiftlyfile ) ).nil?
+          eval( IO.read( self.swiftlyfile ) )
 
-            load_hash = Resolver.get :server
-
-          end
+          load_hash = Resolver.get( :server ) == {} ? false : Resolver.get( :server )
 
         when :global
 
@@ -121,7 +117,7 @@ module Swiftly
 
         when :all
 
-          eval( IO.read( swiftlyfile ) ) unless eval( IO.read( swiftlyfile ) ).nil?
+          eval( IO.read( self.swiftlyfile ) ) unless eval( IO.read( self.swiftlyfile ) ).nil?
 
 
           wp_config_parse project_name
@@ -130,13 +126,11 @@ module Swiftly
           eval( IO.read( project_file( project_name ) ) ) unless eval( IO.read( project_file( project_name ) ) ).nil?
 
 
-
           load_hash = Resolver.get :server
 
         end
 
-
-         load_hash
+        return load_hash
 
       end
 

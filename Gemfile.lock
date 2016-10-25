@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    swiftly (3.0.1)
+    swiftly (5.0.1)
       activesupport (~> 4.0.1)
       awesome_print (~> 1.6.1)
       git (~> 1.2.6)
@@ -40,4 +40,4 @@ DEPENDENCIES
   swiftly!
 
 BUNDLED WITH
-   1.10.5
+   1.11.2
