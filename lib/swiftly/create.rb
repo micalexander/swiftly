@@ -58,12 +58,11 @@ module Swiftly
 
       global_settings  = Swiftly::Config.load :global
       project_settings = Swiftly::Config.load :swiftly
+      template = Swiftly::Template.retrieve :wordpress, options[:template]
 
-      template = Swiftly::Package.load({
-        framework: :wordpress,
-        type:      :template,
-        name:      options[:template]
-      })
+      say_status "#{APP_NAME}:", "Wordpress template #{options[:template]} cannot be found.", :yellow unless template
+
+      abort unless template
 
       project_path = File.join(
         global_settings[:sites_path],

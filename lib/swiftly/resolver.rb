@@ -3,13 +3,11 @@ module Swiftly
 
     @@settings = {
       server: [],
-      package: []
     }
 
     def self.load setting, type, attributes
 
       @@settings[setting] <<  { type => attributes }
-
     end
 
     def self.get setting
@@ -17,8 +15,13 @@ module Swiftly
       override  = {}
       final     = {}
 
+      # Check to see if there is a setting in the array
+      # that matches the setting param
       if !@@settings[setting].nil?
 
+
+
+        # If so loop through
         @@settings[setting].each do |s|
 
           s.each do |k, v|
@@ -41,7 +44,6 @@ module Swiftly
 
           construct = {}
           capture   = {}
-
           override[k].each do |o|
 
             final.merge!( {k => {} } )

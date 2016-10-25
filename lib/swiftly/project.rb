@@ -12,6 +12,8 @@ module Swiftly
 
       def self.set setting, *args, &block
 
+        return unless setting == :server
+
         Swiftly::Smokestack.define do
 
           factory setting, &block

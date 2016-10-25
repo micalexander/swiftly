@@ -69,6 +69,9 @@ module Swiftly
 
       def self.set setting, *args, &block
 
+        # Ensure that we are only getting the server settings
+        return unless setting == :server
+
         Swiftly::Smokestack.define do
 
           factory setting, &block
@@ -79,6 +82,13 @@ module Swiftly
 
       end
 
+
+      #
+      # Loads configuration files for swiftly to use
+      # @param file [string] string file path
+      # @param project_name = nil [string] name of the project
+      #
+      # @return [hash] hash of the settings
       def self.load file, project_name = nil
 
         case file
@@ -93,7 +103,7 @@ module Swiftly
 
           if !eval( IO.read( project_file( project_name ) ) ).nil?
 
-            load_hash = Resolver.get :server == {} ? false : Resolver.get( :package )
+            load_hash = Resolver.get :server == {} ? false : Resolver.get( :server )
 
           end
 

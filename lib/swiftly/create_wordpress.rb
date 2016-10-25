@@ -1,7 +1,6 @@
 require "thor/group"
 require 'rubygems'
 require 'active_support'
-require 'swiftly/packages'
 require 'swiftly/app_module'
 require 'active_support/core_ext/string'
 require 'git'
@@ -14,7 +13,6 @@ module Swiftly
 
     argument :project_name
     argument :template
-    # argument :settings
     argument :project_path
 
     desc "Handles the creation of a wordpress project."
@@ -25,7 +23,7 @@ module Swiftly
 
     end
 
-    def get_wordpress()
+    def get_wordpress
 
       # download wordpress and place it in the project directory
       inside @project_path do
@@ -46,21 +44,21 @@ module Swiftly
 
         inside File.join( 'wp-content', 'themes') do
 
-          if @template[:location] =~ /^#{URI::regexp}\.zip$/
+          if @template.location =~ /^#{URI::regexp}\.zip$/
 
-            zipfile = get @template[:location], File.basename( @template[:location] )
+            zipfile = get @template.location, File.basename( @template.location )
 
-            unzip zipfile, @template[:name] unless File.exist? @template[:name]
+            unzip zipfile, @template.name unless File.exist? @template.name.to_s
 
             remove_file zipfile unless !File.exist? zipfile
 
           else
 
-            FileUtils.cp_r( File.join( @template[:location], @template[:name] ), '.' )
+            FileUtils.cp_r( File.join( @template.location, @template.name.to_s ), '.' )
 
           end
 
-          FileUtils.mv( @template[:name], @project_name ) unless !File.exists? @template[:name].capitalize
+          FileUtils.mv( @template.name.to_s, @project_name ) unless !File.exists? @template.name.to_s.capitalize
 
           inside @project_name do
 
@@ -87,23 +85,23 @@ module Swiftly
               'Gemfile.lock'
             ].each do |file|
 
-              gsub_file file, /(#{@template[:name]})/, @project_name unless !File.exists? file
+              gsub_file file, /(#{@template.name})/, @project_name.gsub(/\-|\./, '_') unless !File.exists? file
 
               FileUtils.mv( file, @project_path ) unless !File.exists? file
 
             end
 
             FileUtils.mv(
-              "#{@template[:name]}-specific-plugin",
+              "#{@template.name}-specific-plugin",
               File.join( @project_path, "wp-content", "plugins", "#{@project_name}-specific-plugin")
-            ) unless !File.exists? "#{@template[:name]}-specific-plugin"
+            ) unless !File.exists? "#{@template.name}-specific-plugin"
 
             FileUtils.mv(
-              File.join( "wp-login-logo-#{@template[:name]}.png" ) ,
+              File.join( "wp-login-logo-#{@template.name}.png" ) ,
               File.join( "wp-login-logo-#{@project_name}.png" )
-            ) unless !File.exists? File.join( "wp-login-logo-#{@template[:name]}.png" )
+            ) unless !File.exists? File.join( "wp-login-logo-#{@template.name}.png" )
 
-            gsub_file 'functions.php', /(#{@template[:name]})/, @project_name
+            gsub_file 'functions.php', /(#{@template.name})/, @project_name
 
           end
         end
@@ -111,34 +109,34 @@ module Swiftly
         inside File.join( "wp-content", "plugins", "#{@project_name}-specific-plugin") do
 
           FileUtils.mv(
-            "#{@template[:name]}-plugin.php",
+            "#{@template.name}-plugin.php",
             "#{@project_name}-plugin.php"
-          ) unless !File.exists? "#{@template[:name]}-plugin.php"
+          ) unless !File.exists? "#{@template.name}-plugin.php"
 
-          gsub_file "#{@project_name}-plugin.php", /(#{@template[:name]})/, @project_name.capitalize unless !File.exists? "#{@template[:name]}-plugin.php"
+          gsub_file "#{@project_name}-plugin.php", /(#{@template.name})/, @project_name.capitalize unless !File.exists? "#{@template.name}-plugin.php"
 
         end
 
         inside File.join( "wp-content", "plugins" ) do
 
-          plugins = Swiftly::Package.load_plugins :wordpress
+          plugins = Swiftly::Plugin.all :wordpress
 
           if plugins
 
             # grab global plugins if they exist
-            plugins.each do |plugin|
+            plugins[:wordpress].each do |plugin|
 
-              if plugin[:location] =~ /^#{URI::regexp}\.zip$/
+              if plugin.location =~ /^#{URI::regexp}\.zip$/
 
-                zipfile = get plugin[:location], File.basename( plugin[:location] )
+                zipfile = get plugin.location, File.basename( plugin.location )
 
-                unzip zipfile, plugin[:name] unless File.exist? plugin[:name]
+                unzip zipfile, plugin.name unless File.exist? plugin.name.to_s
 
                 remove_file zipfile unless !File.exist? zipfile
 
               else
 
-                FileUtils.cp_r( File.join( plugin[:location], plugin[:name] ), '.' ) unless File.exist? plugin[:name]
+                FileUtils.cp_r( File.join( plugin.location, plugin.name.to_s ), '.' ) unless File.exist? plugin.name.to_s
 
               end
             end
@@ -163,7 +161,7 @@ module Swiftly
           gsub_file 'wp-config.php', /(\$local\s*?=[\s|\S]*?)({[\s|\S]*?})/  do |match|
 
             '$local = \'{
-          "db_name": "' + @project_name + '_local_wp",
+          "db_name": "' + @project_name.gsub(/\-|\./, '_') + '_local_wp",
           "db_host": "' + settings[:local][:db_host] + '",
           "db_user": "' + settings[:local][:db_user] + '",
           "db_pass": "' + settings[:local][:db_pass] + '",
