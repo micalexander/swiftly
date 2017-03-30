@@ -1,4 +1,4 @@
-require 'Thor'
+require 'thor'
 require 'yaml'
 require 'swiftly/app_module'
 

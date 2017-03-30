@@ -1,4 +1,4 @@
-require 'Thor'
+require 'thor'
 require 'swiftly/app_module'
 require "thor/group"
 require 'swiftly/project'

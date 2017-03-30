@@ -1,4 +1,4 @@
-require 'Thor'
+require 'thor'
 require 'pathname'
 require 'awesome_print'
 
