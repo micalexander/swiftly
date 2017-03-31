@@ -11,11 +11,11 @@ module Swiftly
 
       File.join(
         @settings[:sites_path],
-      "#{APP_NAME}file",
+      "#{APP_NAME.capitalize}file",
       ) unless !File.exists?(
         File.join(
           @settings[:sites_path],
-          "#{APP_NAME}file"
+          "#{APP_NAME.capitalize}file"
         )
       )
 

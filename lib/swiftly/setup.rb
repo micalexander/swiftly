@@ -1,5 +1,5 @@
 require 'swiftly/app_module'
-require 'swiftly/Database'
+require 'swiftly/database'
 
 module Swiftly
   class Setup < Thor
