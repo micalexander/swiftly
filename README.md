@@ -21,6 +21,16 @@ Run it:
 
 ## Requirements
 
+1. git (with username and email set)
+2. mysql (or equivalent i.e. mariadb) 
+3. php (to load the site, otherwise optional)
+3. Apache/Nginx (to see the site, otherwise optional)
+
+Git must be installed and username and email must be in your global config. Something like the below should do.
+
+`$ git config --global user.name "Your Name"`
+`$ git config --global user.email "your@mail.com"`
+
 Mysql must be in your $PATH. You can check this by running:
 
     $ which mysql
