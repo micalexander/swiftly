@@ -94,7 +94,7 @@ module Swiftly
 
         # Change the theme name from whatever it was named
         # into the the name of the project
-        FileUtils.mv( @template.name.to_s, @project_name ) unless !File.exists? @template.name.to_s.capitalize
+        FileUtils.mv( @template.name.to_s, @project_name ) unless !File.exists? @template.name.to_s
 
         # Change directories
         inside @project_name do
