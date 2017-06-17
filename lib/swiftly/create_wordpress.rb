@@ -69,6 +69,10 @@ module Swiftly
     # @return [void]
     def get_theme
 
+      # Check to see if the template name is default and if it
+      # is then change it to the default template name
+      @template.name = Swiftly::Template.default_name if @template.name == :default
+
       # Change directories to inside of the theme directory
       inside File.join( @project_path, 'wp-content', 'themes') do
 
