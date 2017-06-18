@@ -33,7 +33,15 @@ module Swiftly
 
 
       git.add
-      git.commit_all('initial commit')
+
+      if  !git.config('user.name').empty?
+
+        git.commit_all('initial commit')
+      else
+
+        say_status "#{APP_NAME}:", "Unable to create an initial git commit. Please set your git global user.email and user.name in order to create your first commit", :yellow
+      end
+
 
     end
   end
